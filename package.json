@@ -1,0 +1,41 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@headlessui/react": "^1.7.17",
+        "@inertiajs/react": "^1.0.0",
+        "@tailwindcss/forms": "^0.5.3",
+        "@vitejs/plugin-react": "^4.0.3",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.1.2",
+        "laravel-echo": "^1.15.3",
+        "laravel-vite-plugin": "^0.8.0",
+        "postcss": "^8.4.18",
+        "pusher-js": "^8.3.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.2.1",
+        "vite": "^4.0.0"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.11.4",
+        "@emotion/styled": "^11.11.5",
+        "@fortawesome/fontawesome-free": "^6.5.2",
+        "@fortawesome/fontawesome-svg-core": "^6.5.2",
+        "@fortawesome/free-solid-svg-icons": "^6.5.2",
+        "@fortawesome/react-fontawesome": "^0.2.0",
+        "@heroicons/react": "^2.0.18",
+        "@inertiajs/inertia-react": "^0.8.1",
+        "@mui/material": "^5.15.15",
+        "@soketi/soketi": "^1.6.0",
+        "clsx": "^2.0.0",
+        "lodash": "^4.17.21",
+        "react-social-login-buttons": "^4.1.0",
+        "react-spinners": "^0.13.8",
+        "sweetalert2": "^11.11.0"
+    }
+}
