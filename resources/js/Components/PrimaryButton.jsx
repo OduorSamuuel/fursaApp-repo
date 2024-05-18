@@ -34,7 +34,7 @@ export default function PrimaryButton({ className = '', processing, children, ..
         <button
             {...props}
             className={
-                `flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out max-w-md h-10 ${
+                `flex justify-center  px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out max-w-md h-10 ${
                     processing || isLoading ? 'opacity-50 cursor-not-allowed' : ''
                 } ${className}`
             }

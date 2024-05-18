@@ -1,9 +1,11 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Support\Facades\Redirect;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Admin;
+use App\Models\ServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,14 +30,38 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
+  /**
+ * Handle an incoming authentication request.
+ */
+public function store(LoginRequest $request)
+{
+    $request->authenticate();
 
-        $request->session()->regenerate();
+    $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+    // Render dashboard based on user's role
+    $user = Auth::user();
+    if ($user->is_admin) {
+        $admin = Admin::where('user_id', $user->id)->first();
+        if ($admin) {
+            // Check admin type
+            if ($admin->title === 'serviceprovider_admin') {
+                $serviceProvider = ServiceProvider::where('user_id', $user->id)->first();
+                if ($serviceProvider && $serviceProvider->is_approved) {
+                    return Redirect::intended(RouteServiceProvider::Dashboard);
+                } else {
+                    return Inertia::render('Errors/ApprovalPending');
+                }
+            } elseif ($admin->title === 'general_admin') {
+                return Redirect::intended(RouteServiceProvider::adminDashboard);
+            }
+        }
     }
+
+    // If no specific dashboard, redirect to intended URL or home
+    return Redirect::intended(RouteServiceProvider::HOME); 
+}
+
 
     /**
      * Destroy an authenticated session.

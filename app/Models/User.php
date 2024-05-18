@@ -27,7 +27,7 @@ class User extends Authenticatable
         'verification_token',
         'token_expiration_time',
         'is_verified',
-        'role',
+        'is_admin',
     ];
 
     /**
@@ -51,6 +51,7 @@ class User extends Authenticatable
         'last_seen_at' => 'datetime',
         'token_expiration_time' => 'datetime',
         'is_verified' => 'boolean',
+        'is_admin' => 'boolean',
     ];
 
     public function searchableAs(): string
@@ -79,5 +80,15 @@ class User extends Authenticatable
     public function messages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Chat::class, 'sender_id', 'id');
+    }
+
+    public function admin(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Admin::class);
+    }
+
+    public function serviceProvider(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ServiceProvider::class);
     }
 }

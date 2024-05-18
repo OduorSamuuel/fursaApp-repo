@@ -43,7 +43,7 @@ const Layout = ({ auth, children }) => {
                         <Link href={route('login')} className="text-gray-800 hover:text-blue-500">Login</Link>
                       </li>
                       <li className="mx-3">
-                        <Link href={route('register')} className="text-gray-800 hover:text-blue-500">Register</Link>
+                        <Link href='/choice' className="text-gray-800 hover:text-blue-500">Register</Link>
                       </li>
                     </>
                   )}

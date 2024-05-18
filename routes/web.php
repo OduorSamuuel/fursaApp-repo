@@ -59,9 +59,28 @@ Route::get('/about', function () {
 Route::get('/services', function () {
     return Inertia::render('Services');
 });
-Route::get('/verificationa', function () {
-    return Inertia::render('Verification');
+Route::get('/provider', function () {
+    return Inertia::render('Auth/RegisterServiceProvider');
 });
+Route::get('/choice', function () {
+    return Inertia::render('RegistrationChoice');
+});
+Route::middleware(['role:serviceprovider_admin'])->group(function () {
+    Route::get('/service/dashboard', function () {
+        return Inertia::render('Admin/Service_provider');
+    });
+});
+
+Route::middleware(['role:general_admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return Inertia::render('Admin/Admin');
+    });
+});
+
+Route::get('/register', function () {
+    return Inertia::render('Auth/RegisterClient');
+})->name('register.client');
+
 Route::get('auth/google',[GoogleAuthController::class, 'redirect'])->name('google-auth');
 Route::get('auth/google/call-back',[GoogleAuthController::class, 'callback']);
 Route::get('/verify', function () {
