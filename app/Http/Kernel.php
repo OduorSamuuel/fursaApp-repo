@@ -74,6 +74,8 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // Other middleware...
         'role' => \App\Http\Middleware\RoleMiddleware::class, 
+        'admin.otp' => \App\Http\Middleware\AdminOtpVerification::class,
+        'ensure.screen.unlocked' => \App\Http\Middleware\EnsureScreenIsUnlocked::class,
     ];
     
 }

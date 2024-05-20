@@ -5,6 +5,7 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Inertia\Inertia;
 
 
@@ -62,20 +63,25 @@ Route::get('/services', function () {
 Route::get('/provider', function () {
     return Inertia::render('Auth/RegisterServiceProvider');
 });
+
 Route::get('/choice', function () {
     return Inertia::render('RegistrationChoice');
 });
-Route::middleware(['role:serviceprovider_admin'])->group(function () {
+// Routes for service provider admin
+// Routes for service provider admin
+Route::middleware(['role:serviceprovider_admin', 'admin.otp', 'ensure.screen.unlocked'])->group(function () {
     Route::get('/service/dashboard', function () {
         return Inertia::render('Admin/Service_provider');
-    });
+    })->name('service_admin');
 });
 
-Route::middleware(['role:general_admin'])->group(function () {
+// Routes for general admin
+Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])->group(function () {
     Route::get('/admin/dashboard', function () {
         return Inertia::render('Admin/Admin');
-    });
+    })->name('gen_admin');
 });
+
 
 Route::get('/register', function () {
     return Inertia::render('Auth/RegisterClient');
@@ -89,6 +95,18 @@ Route::get('/verify', function () {
 })->name('success');
 Route::get('/verification/{token}', [VerificationController::class, 'verify'])->name('verification');
 
+Route::post('/verify-otp', [AuthenticatedSessionController::class, 'verifyOtp'])->name('verify.otp');
+Route::get('/otp-verification/{userId}', [AuthenticatedSessionController::class, 'showOtpVerificationPage'])
+    ->name('otp.verification');
+Route::post('/otp-verification', [AuthenticatedSessionController::class, 'verifyOtp'])->name('otp-verification');
+
+Route::post('/unlock-screen', [AuthenticatedSessionController::class, 'unlockScreen'])->name('unlock.screen');
+Route::get('/admin/lock-screen', [AuthenticatedSessionController::class, 'lockScreen'])->name('lock-screen');
+
+// Then, define the route for the locked screen view
+Route::get('/admin/locked', function () {
+    return Inertia::render('Admin/LockedScreenOverlay');
+})->name('admin.locked');
 
 require __DIR__.'/auth.php';
 

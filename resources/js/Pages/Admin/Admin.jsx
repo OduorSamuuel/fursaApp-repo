@@ -1,10 +1,20 @@
 import React from 'react'
+import Layout from '../../Layouts/Layout'
+import Sidebar from '@/Layouts/Admin/Sidebar'
+import TopBar from '@/Layouts/Admin/TopBar'
 
-function Admin() {
+function Admin(){
   return (
-    <div className=' bg-red-300 text-center'>
-      <h1>This is the superior admin dashboard</h1>
-    </div>
+   
+<div>
+  <TopBar/>
+  
+  <Sidebar/>
+
+
+</div>
+
+   
   )
 }
 

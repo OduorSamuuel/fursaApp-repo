@@ -21,6 +21,8 @@ return new class extends Migration
             $table->timestamp('token_expiration_time')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_admin')->default(false);
+            $table->string('otp')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

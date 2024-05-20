@@ -28,6 +28,8 @@ class User extends Authenticatable
         'token_expiration_time',
         'is_verified',
         'is_admin',
+        'otp',               
+        'otp_expires_at',  
     ];
 
     /**
@@ -52,6 +54,7 @@ class User extends Authenticatable
         'token_expiration_time' => 'datetime',
         'is_verified' => 'boolean',
         'is_admin' => 'boolean',
+        'otp_expires_at' => 'datetime',  // Added cast for OTP expiration time
     ];
 
     public function searchableAs(): string

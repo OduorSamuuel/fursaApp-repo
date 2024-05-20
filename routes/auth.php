@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'createClient'])
                 ->name('register');
@@ -59,4 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
                 ->name('logout');
 });
+//Route::get('/admin/auth/{userId}', [AuthenticatedSessionController::class, 'otpVerification'])->name('otp.verification');
+//Route::get('/otp/verification/{userId}', [AuthenticatedSessionController::class, 'otpVerification'])->name('otp.verification');
+//Route::post('/otp/verification', [AuthenticatedSessionController::class, 'verifyOtp'])->name('otp.verify');
+
 
