@@ -34,9 +34,21 @@ const Layout = ({ auth, children }) => {
                     <Link href="/services" className="text-gray-800 hover:text-blue-500">Services</Link>
                   </li>
                   {auth.user ? (
-                    <li className="mx-3">
+                    <>
+                       <li className="mx-3">
                       <Link href={route('chat.index')} className="text-gray-800 hover:text-blue-500">Chats</Link>
                     </li>
+                  <li>
+                  <Link as="button" method="post" href={route('logout')}>
+                       Logout
+                    </Link>
+                  </li>
+                   
+                    </>
+                 
+                   
+                   
+                   
                   ) : (
                     <>
                       <li className="mx-3">

@@ -1,117 +1,97 @@
-import { useEffect } from 'react';
-import Checkbox from '@/Components/Chat/Checkbox';
-import GuestLayout from '@/Layouts/GuestLayout';
+import { useEffect, useState } from 'react';
+import { CircularProgress } from '@mui/material';
+import { Link, useForm } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+import Checkbox from '@/Components/Chat/Checkbox';
 
-export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+const Login = ({ status, canResetPassword }) => {
+  const { data, setData, post, processing, errors, reset } = useForm({
+    email: '',
+    password: '',
+    remember: false,
+  });
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
-
-    const submit = (e) => {
-        e.preventDefault();
-
-        post(route('login'));
+  useEffect(() => {
+    return () => {
+      reset('password');
     };
+  }, []);
 
-    return (
-       
-          
- 
-    
-  
-             <GuestLayout>
-  
-              <h2 class="mt-6 text-3xl font-extrabold text-center text-gray-900 leading-9">
-      Sign in to your account
-    </h2>
-    <p class="mt-2 text-sm text-center text-gray-600 leading-5 max-w">
-      Or
-      <Link href='/choice' class="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150">
-        create a new account
-      </Link>
-    </p>
-             <Head title="Log in" />
+  const [isLoading, setIsLoading] = useState(false);
 
-            {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    await post(route('login'));
+    setIsLoading(false);
+  };
 
-            <form onSubmit={submit} className=''>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+  return (
+    <>
+      <div className="flex items-center justify-center min-h-screen bg-gray-400">
+        <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
+          <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">Sign in to your account</h2>
+          {status && <p className="text-green-500 mb-4 text-sm">{status}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="mt-4">
+              <InputLabel htmlFor="email" value="Email" />
+              <TextInput
+                id="email"
+                type="email"
+                name="email"
+                value={data.email}
+                className="mt-1 block w-full"
+                autoComplete="username"
+                autoFocus={true}
+                onChange={(e) => setData('email', e.target.value)}
+              />
+              <InputError message={errors.email} className="mt-2" />
+            </div>
+            <div className="mt-4">
+              <InputLabel htmlFor="password" value="Password" />
+              <TextInput
+                id="password"
+                type="password"
+                name="password"
+                value={data.password}
+                className="mt-1 block w-full"
+                autoComplete="current-password"
+                onChange={(e) => setData('password', e.target.value)}
+              />
+              <InputError message={errors.password} className="mt-2" />
+            </div>
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center">
+                <Checkbox
+                  name="remember"
+                  checked={data.remember}
+                  onChange={(e) => setData('remember', e.target.checked)}
+                />
+                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+              </div>
+              {canResetPassword && (
+                <Link
+                  href={route('password.request')}
+                  className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150"
+                >
+                  Forgot your password?
+                </Link>
+              )}
+            </div>
+            <PrimaryButton className="mt-4 w-full" disabled={processing || isLoading}>
+              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Log in'}
+            </PrimaryButton>
+          </form>
+          <p className="text-sm text-gray-500 mt-4 text-center">
+            Or <Link href="/choice" className="underline cursor-pointer">create a new account</Link>
+          </p>
+        </div>
+      </div>
+    </>
+  );
+};
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
-                </div>
-
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-<div className='flex '>
-<div className="block m-5" >
-                    <label className="flex items-center">
-                        <Checkbox 
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
-                        />
-                        <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                    </label>
-                </div>
-
-                <div className="flex items-center justify-end m-5">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:underline transition ease-in-out duration-150"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
-
-                   
-                </div>
-</div>
-                
-                <PrimaryButton className=" w-full" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
-            </form>
-        </GuestLayout>
-    
-       
-    );
-}
+export default Login;

@@ -98,6 +98,7 @@ Route::get('/verification/{token}', [VerificationController::class, 'verify'])->
 Route::post('/verify-otp', [AuthenticatedSessionController::class, 'verifyOtp'])->name('verify.otp');
 Route::get('/otp-verification/{userId}', [AuthenticatedSessionController::class, 'showOtpVerificationPage'])
     ->name('otp.verification');
+
 Route::post('/otp-verification', [AuthenticatedSessionController::class, 'verifyOtp'])->name('otp-verification');
 
 Route::post('/unlock-screen', [AuthenticatedSessionController::class, 'unlockScreen'])->name('unlock.screen');
@@ -107,6 +108,11 @@ Route::get('/admin/lock-screen', [AuthenticatedSessionController::class, 'lockSc
 Route::get('/admin/locked', function () {
     return Inertia::render('Admin/LockedScreenOverlay');
 })->name('admin.locked');
+
+Route::get('/page-error/{fakeUrl}', function () {
+    return Inertia::render('Errors/NotFound');
+})->name('error');
+
 
 require __DIR__.'/auth.php';
 

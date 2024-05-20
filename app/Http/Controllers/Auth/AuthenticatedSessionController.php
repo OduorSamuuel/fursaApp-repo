@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\Admin;
-use App\Models\ServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use App\Mail\SendOtp;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -32,9 +32,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Show the OTP verification page.
      */
-    public function showOtpVerificationPage($userId)
+    public function showOtpVerificationPage($encodedString)
     {
-        return Inertia::render('Auth/OtpVerification', ['userId' => $userId]);
+        $userId = $this->decodeString($encodedString);
+        if (!$userId) {
+            return abort(404);
+        }
+
+        return Inertia::render('Auth/OtpVerification', ['userId' => $encodedString]);
     }
 
     /**
@@ -42,25 +47,31 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        $request->authenticate();
-        $request->session()->regenerate();
+        try {
+            $request->authenticate();
+            $request->session()->regenerate();
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-       
-        if ($user->is_admin) {
-            $admin = Admin::where('user_id', $user->id)->first();
-            if ($admin) {
-             
-                $otp = $this->generateAndSaveOtp($user->id, $user->email);
-              
-                return Redirect::route('otp.verification', ['userId' => $user->id]);
+            if ($user->is_admin) {
+                $admin = Admin::where('user_id', $user->id)->first();
+                if ($admin) {
+                    $otp = $this->generateAndSaveOtp($user->id, $user->email);
+                    $encodedString = $this->encodeString($user->id);
+                    return Redirect::route('otp.verification', ['userId' => $encodedString]);
+                }
             }
-        }
 
-     
-        return Redirect::intended(RouteServiceProvider::HOME);
+            return Redirect::intended(RouteServiceProvider::HOME);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors (e.g., wrong password)
+            return Redirect::back()->withErrors(['email' => 'Invalid email or password']);
+        } catch (\Exception $e) {
+            // Handle other exceptions
+            return Redirect::back()->withErrors(['email' => 'Something went wrong. Please try again.']);
+        }
     }
+
 
     /**
      * Verify OTP for admin users.
@@ -71,18 +82,21 @@ class AuthenticatedSessionController extends Controller
             'userId' => 'required',
             'otp' => 'required',
         ]);
-    
-        $userId = $request->userId;
+
+        $userId = $this->decodeString($request->userId);
+        if (!$userId) {
+            return response()->json(['error' => 'Invalid user ID'], 400);
+        }
+
         $enteredOtp = $request->otp;
-    
         $savedOtpHash = DB::table('users')->where('id', $userId)->value('otp');
-    
+
         if ($savedOtpHash && Hash::check($enteredOtp, $savedOtpHash)) {
             DB::table('users')->where('id', $userId)->update(['otp' => null]);
             Auth::loginUsingId($userId);
-    
+
             $user = Auth::user();
-    
+
             if ($user->is_admin) {
                 $admin = Admin::where('user_id', $user->id)->first();
                 if ($admin) {
@@ -96,27 +110,22 @@ class AuthenticatedSessionController extends Controller
                 }
             }
         }
-    
+
         return response()->json(['error' => 'Invalid OTP'], 400);
     }
-    
-    
+
     /**
      * Generate OTP and send it via email.
      */
     protected function generateAndSaveOtp($userId, $email)
     {
-        // Validate email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \Exception('Invalid email address.');
         }
 
         $otp = rand(100000, 999999);
         Mail::to($email)->send(new SendOtp($otp));
-
-        // Save OTP hash in user table
         DB::table('users')->where('id', $userId)->update(['otp' => bcrypt($otp)]);
-
         return $otp;
     }
 
@@ -130,53 +139,56 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
- public function lockScreen(Request $request)
-{
-    $request->session()->put('screen_locked', true);
-    return Redirect::route('admin.locked');
-}
-public function unlockScreen(Request $request)
-{
-    // Get the currently authenticated user
-    $user = Auth::user();
 
-    // Get the password entered by the user
-    $password = $request->input('password');
-
-    // Compare the password entered by the user with the password stored in the database
-    if (Hash::check($password, $user->password)) {
-        // If passwords match, remove the screen_locked session
-        $request->session()->forget('screen_locked');
-
-        // Check if the user is a service provider admin or a general admin
-        if ($user->is_admin) {
-            $admin = Admin::where('user_id', $user->id)->first();
-            if ($admin) {
-                if ($admin->title === 'serviceprovider_admin') {
-                   
-                    return response()->json(['success' => 'serviceprovider_admin']);
-                } elseif ($admin->title === 'general_admin') {
-                   
-                    return response()->json(['success' => 'general_admin']);
-                }
-            }
-        }
-
-
-        return response()->json(['success' => 'default']);
+    public function lockScreen(Request $request)
+    {
+        $request->session()->put('screen_locked', true);
+        return Redirect::route('admin.locked');
     }
 
-   
-    return response()->json(['error' => 'Invalid password'], 422);
-}
+    public function unlockScreen(Request $request)
+    {
+        $user = Auth::user();
+        $password = $request->input('password');
 
+        if (Hash::check($password, $user->password)) {
+            $request->session()->forget('screen_locked');
 
+            if ($user->is_admin) {
+                $admin = Admin::where('user_id', $user->id)->first();
+                if ($admin) {
+                    if ($admin->title === 'serviceprovider_admin') {
+                        return response()->json(['success' => 'serviceprovider_admin']);
+                    } elseif ($admin->title === 'general_admin') {
+                        return response()->json(['success' => 'general_admin']);
+                    }
+                }
+            }
 
+            return response()->json(['success' => 'default']);
+        }
 
+        return response()->json(['error' => 'Invalid password'], 422);
+    }
+
+    private function encodeString($userId)
+    {
+        $nonce = Str::random(10);
+        $timestamp = time();
+        return base64_encode($userId . '|' . $nonce . '|' . $timestamp);
+    }
+
+    private function decodeString($encodedString)
+    {
+        $decoded = base64_decode($encodedString);
+        $parts = explode('|', $decoded);
+        if (count($parts) === 3) {
+            return $parts[0]; // Return the user ID part
+        }
+        return null;
+    }
 }

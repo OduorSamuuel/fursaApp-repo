@@ -6,7 +6,7 @@ export default function Home({ auth, laravelVersion, phpVersion }) {
   return (
     <Layout auth={auth}>
       <Head title="Home" />
-   <h1>Welcome to the schedular app home page</h1>
+   <h1>Welcome to the fursaApp app home page</h1>
     </Layout>
   );
 }
