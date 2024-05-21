@@ -56,11 +56,7 @@ const RegisterServiceProvider = () => {
         </Backdrop>
         <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
           <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">Create an account</h2>
-<<<<<<< HEAD
-
-=======
        
->>>>>>> 111b14e9d009af301b181148e76680bfb2f2183b
           {data.success && (
             <p className="text-green-500 mb-4 text-sm">{data.success}</p>
           )}
