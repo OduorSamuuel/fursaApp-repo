@@ -63,6 +63,8 @@ const Login = ({ status, canResetPassword }) => {
               />
               <InputError message={errors.password} className="mt-2" />
             </div>
+
+<InputError message={errors.password} className="mt-2" />
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center">
                 <Checkbox
