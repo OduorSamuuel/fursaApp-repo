@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use App\Models\ServiceProvider;
 use Inertia\Inertia;
 use App\Mail\SendOtp;
 use Illuminate\Support\Facades\DB;
@@ -50,18 +51,28 @@ class AuthenticatedSessionController extends Controller
         try {
             $request->authenticate();
             $request->session()->regenerate();
-
+    
             $user = Auth::user();
-
+    
             if ($user->is_admin) {
                 $admin = Admin::where('user_id', $user->id)->first();
                 if ($admin) {
-                    $otp = $this->generateAndSaveOtp($user->id, $user->email);
-                    $encodedString = $this->encodeString($user->id);
-                    return Redirect::route('otp.verification', ['userId' => $encodedString]);
+                    $serviceProvider = ServiceProvider::where('user_id', $user->id)->first();
+                    if ($serviceProvider) {
+                        if ($serviceProvider->is_approved) {
+                            // Service provider admin and is verified
+                            return $this->handleOtpVerification($user);
+                        } else {
+                            // Service provider admin but not verified
+                            return Inertia::render('Errors/ApprovalPending');
+                        }
+                    } else {
+                        // General admin
+                        return $this->handleOtpVerification($user);
+                    }
                 }
             }
-
+    
             return Redirect::intended(RouteServiceProvider::HOME);
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Handle validation errors (e.g., wrong password)
@@ -71,7 +82,14 @@ class AuthenticatedSessionController extends Controller
             return Redirect::back()->withErrors(['email' => 'Something went wrong. Please try again.']);
         }
     }
-
+    
+    protected function handleOtpVerification($user)
+    {
+        $otp = $this->generateAndSaveOtp($user->id, $user->email);
+        $encodedString = $this->encodeString($user->id);
+        return Redirect::route('otp.verification', ['userId' => $encodedString]);
+    }
+    
 
     /**
      * Verify OTP for admin users.

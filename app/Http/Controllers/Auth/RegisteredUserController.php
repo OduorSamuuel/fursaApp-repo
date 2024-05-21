@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -87,6 +88,7 @@ class RegisteredUserController extends Controller
         $username = explode('@', $request->email)[0];
         $verificationToken = Str::random(60);
     
+        DB::beginTransaction();
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -108,17 +110,27 @@ class RegisteredUserController extends Controller
                 'address' => $request->address,
                 'is_approved' => false,
             ]);
+    
+            Admin::create([
+                'user_id' => $user->id,
+                'title' => 'serviceprovider_admin',
+                'contact_number' => $request->contact_number,
+            ]);
+    
             $tokenLink = route('verification', ['token' => $verificationToken]);
     
             try {
                 Mail::to($user->email)->send(new UserVerification($tokenLink));
             } catch (\Exception $e) {
+                DB::rollBack();
                 return back()->with('error', 'Registration successful, but the verification email could not be sent.');
             }
     
+            DB::commit();
             return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
     
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->with('error', 'Something went wrong during user creation. Please try again.');
         }
     }

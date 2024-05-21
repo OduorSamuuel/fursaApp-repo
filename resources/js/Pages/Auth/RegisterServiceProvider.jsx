@@ -46,9 +46,7 @@ const RegisterServiceProvider = () => {
         </Backdrop>
         <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
           <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">Create an account</h2>
-          {errors && (
-            <p className="text-red-500 mb-4 text-sm">{Object.values(errors).flat().join(', ')}</p>
-          )}
+       
           {data.success && (
             <p className="text-green-500 mb-4 text-sm">{data.success}</p>
           )}
