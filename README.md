@@ -75,6 +75,7 @@ php artisan migrate
 php artisan db:seed
 ```
 
+>Make sure you have set up pusher for message broadcasting to work. Create a pusher acccount anc copy the  credentials here
 >You must install soketi <a href="https://docs.soketi.app/getting-started/installation/cli-installation" target="_blank">Soketi</a> globally before running the application.
 
 Install Soketi
