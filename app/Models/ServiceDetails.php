@@ -20,7 +20,7 @@ class ServiceDetails extends Model
     // Define the relationship with service providers
     public function serviceProvider()
     {
-        return $this->belongsTo(ServiceProvider::class);
+        return $this->belongsTo(ServiceProviders::class);
     }
 
     // Define the one-to-many relationship with images

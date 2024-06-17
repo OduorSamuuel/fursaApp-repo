@@ -23,7 +23,7 @@ class ServiceRequest extends Model
 
     public function serviceProvider()
     {
-        return $this->belongsTo(ServiceProvider::class);
+        return $this->belongsTo(ServiceProviders::class);
     }
 
     public function appointment()

@@ -14,50 +14,59 @@ use App\Models\Services;
 use App\Models\Rating;
 use App\Models\Appointment;
 use App\Models\PricingTiers;
-
+use App\Models\ServiceProviders;
 use Illuminate\Support\Facades\Redirect;
 
 
 class ServiceController extends Controller
 {
     public function index()
-{
-    try {
-        $serviceProviders = ServiceProvider::with([
-            'user',
-            'serviceDetails.images',
-            'ratings',
-            'serviceDetails.pricingTiers' => function ($query) {
-                $query->where('name', 'Basic');
-            }
-        ])
-        ->whereHas('serviceDetails.images')
-        ->whereNotNull('is_approved')
-        ->get()
-        ->map(function ($provider) {
-            // Get the 'Basic' pricing tier if it exists
-            $basicPricing = $provider->serviceDetails->pricingTiers->firstWhere('name', 'Basic');
-
-            return [
-                'id' => $provider->serviceDetails->id, // Add the service ID here
-                'user_name' => $provider->user->name,
-                'service_name' => $provider->service_type,
-                'price' => $basicPricing ? $basicPricing->price : null,
-                'image' => $provider->serviceDetails->images->first()->path ?? null,
-                'rating' => $provider->ratings->avg('rating') ?? null,
-            ];
-        });
-//d($serviceProviders);
-        return Inertia::render('Home', [
-            'serviceProviders' => $serviceProviders,
-        ]);
-    } catch (\Exception $e) {
-        // Handle the error when there's a null rating
-        return Inertia::render('Home');
+    {
+        try {
+            // Fetch service providers with user details
+            $serviceProviders = ServiceProviders::with('user')
+                ->whereNotNull('is_approved')
+                ->get()
+                ->map(function ($provider) {
+                  //  dd($provider);
+                    // Fetch service details for the provider
+                    $serviceDetails = ServiceDetails::where('service_provider_id', $provider->id)
+                        ->with('images', 'pricingTiers')
+                        ->first();
+    
+                    if ($serviceDetails) {
+                        // Extract necessary data
+                        $basicPricing = $serviceDetails->pricingTiers->where('name', 'Basic')->first();
+                        $imagePath = $serviceDetails->images->first()->path ?? null;
+  
+                        return [
+                            'id' => $serviceDetails->id,
+                            'user_name' => $provider->user->name, // Access user's name through the 'user' relationship
+                            'service_name' => $provider->service_type,
+                            'price' => $basicPricing ? $basicPricing->price : null,
+                            'image' => $imagePath,
+                            'rating' => $provider->ratings()->avg('rating'),
+                        ];
+                    } else {
+                        return null; // Handle if service details not found
+                    }
+                })
+                ->filter(); // Remove null values from the collection
+    
+            // Debugging to check fetched data
+           
+    
+            // Render view with data using Inertia
+            return Inertia::render('Home', [
+                'serviceProviders' => $serviceProviders,
+            ]);
+        } catch (\Exception $e) {
+            // Handle exceptions
+            dd($e);
+            return Inertia::render('Home');
+        }
     }
-}
-
-
+    
 public function getDescription($id)
 {
     try {
@@ -122,7 +131,7 @@ public function getDescription($id)
 
     public function services()
 {
-    $provider = ServiceProvider::where('user_id', Auth::id())->first();
+    $provider = ServiceProviders::where('user_id', Auth::id())->first();
     $countyName = null;
     $serviceDetails = null;
     $pricingTiers = [];
@@ -149,7 +158,7 @@ public function getDescription($id)
 
     public function update(Request $request, $id)
     {
-        $provider = ServiceProvider::find($id);
+        $provider = ServiceProviders::find($id);
 
         if (!$provider || $provider->user_id !== Auth::id()) {
             return redirect()->route('admin.services')->with('error', 'Unauthorized access.');
@@ -178,9 +187,9 @@ public function getDescription($id)
     
     public function updateAdditional(Request $request, $id)
     {
-      
+      //dd($request->all());
         // Find the service provider
-        $provider = ServiceProvider::find($id);
+        $provider = ServiceProviders::find($id);
 
         // Ensure the provider exists and the user is authorized
         if (!$provider || $provider->user_id !== auth()->id()) {
@@ -221,7 +230,7 @@ public function getDescription($id)
                 ]
             );
         }
-
+      
         // Handle image uploads and store in the database and public folder
         $images = [];
         foreach (['image_1', 'image_2', 'image_3'] as $index => $imageField) {
@@ -243,7 +252,7 @@ public function getDescription($id)
                 $images[] = $image;
             }
         }
-
+       //dd($images);
         // Redirect with success message
         return redirect()->route('admin.services')->with('success', 'Additional details updated successfully.');
     }

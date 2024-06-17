@@ -94,7 +94,7 @@ class User extends Authenticatable
 
     public function serviceProvider(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(ServiceProvider::class);
+        return $this->hasOne(ServiceProviders::class);
     }
     
     // Method to retrieve personal access tokens

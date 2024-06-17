@@ -14,8 +14,8 @@ class CreateRatingsTable extends Migration
     {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('service_provider_id');
-            $table->foreign('service_provider_id')->references('id')->on('service_providers')->onDelete('cascade');
+            $table->unsignedBigInteger('service_providers_id');
+            $table->foreign('service_providers_id')->references('id')->on('service_providers')->onDelete('cascade');
             $table->unsignedTinyInteger('rating'); // Assuming ratings are from 1 to 5
             $table->text('comment')->nullable();
             $table->timestamps();

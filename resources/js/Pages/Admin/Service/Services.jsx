@@ -1,4 +1,4 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePage, useForm } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import SidebarLayout from '@/Layouts/Admin/SidebarLayout';
@@ -8,25 +8,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faSave, faSpinner, faTimes } from '@fortawesome/free-solid-svg-icons';
 import Card from '../../../Components/Card';
 
-
-
 function Services() {
     const { provider, countyName, counties, serviceDetails, pricingTiers } = usePage().props;
     const [isEditing, setIsEditing] = useState(false);
     const [isEditingAdditional, setIsEditingAdditional] = useState(false);
     const [previews, setPreviews] = useState([null, null, null]);
     const [serviceName, setServiceName] = useState('');
-  const [basicPrice, setBasicPrice] = useState('');
-  const [basicDescription, setBasicDescription] = useState('');
-  const [standardPrice, setStandardPrice] = useState('');
-  const [standardDescription, setStandardDescription] = useState('');
-  const [premiumPrice, setPremiumPrice] = useState('');
-  const [premiumDescription, setPremiumDescription] = useState('');
 
-
-    const page = usePage();
-    
-    const { data, setData, put, processing, errors,progress } = useForm({
+    const { data, setData, put, processing, errors, progress } = useForm({
         company_name: provider?.company_name || '',
         service_type: provider?.service_type || '',
         contact_number: provider?.contact_number || '',
@@ -35,16 +24,20 @@ function Services() {
         service_image: null,
         service_description: serviceDetails?.service_description || '',
         availability: serviceDetails?.availability || '',
-       
         images: [],
-        pricing_tiers: pricingTiers || [
+        pricing_tiers: pricingTiers && pricingTiers.length ? pricingTiers : [
             { name: 'Basic', price: '', description: '' },
             { name: 'Standard', price: '', description: '' },
             { name: 'Premium', price: '', description: '' },
         ],
     });
 
-    
+    useEffect(() => {
+        if (pricingTiers) {
+            setData('pricing_tiers', pricingTiers);
+        }
+    }, [pricingTiers]);
+
     const handleEdit = () => {
         if (isEditing) {
             put(route('admin.services.update', provider.id), {
@@ -55,16 +48,13 @@ function Services() {
                 },
                 onError: () => {
                     toast.error('Failed to update service details.');
-                }
+                },
             });
         } else {
             setIsEditing(true);
         }
     };
-   
-    if (page.props.success) {
-        toast.success(page.props.success);
-    }
+
     const handleEditAdditional = () => {
         if (isEditingAdditional) {
             const formData = new FormData();
@@ -75,13 +65,10 @@ function Services() {
                 formData.append(`pricing_tiers[${index}][description]`, tier.description);
             });
             formData.append('service_description', data.service_description);
-            
-            // Append the actual files instead of Blob URLs
             data.images.forEach((file, index) => {
                 formData.append(`image_${index + 1}`, file);
             });
-    
-            // Submit the form data
+
             Inertia.post(route('admin.services.updateadditional', provider.id), formData)
                 .then(() => {
                     toast.success('Additional details updated successfully.');
@@ -97,7 +84,7 @@ function Services() {
             setIsEditingAdditional(true);
         }
     };
-    
+
     const handleChange = (e) => {
         setData(e.target.name, e.target.value);
     };
@@ -112,7 +99,6 @@ function Services() {
         }
 
         const updatedFiles = [...data.images];
-
         files.forEach((file, index) => {
             const previewIndex = newPreviews.findIndex(preview => preview === null);
             if (previewIndex !== -1) {
@@ -124,6 +110,7 @@ function Services() {
         setData('images', updatedFiles);
         setPreviews(newPreviews);
     };
+
     const handleRemoveImage = (index) => {
         const newPreviews = [...previews];
         const updatedFiles = [...data.images];
@@ -134,12 +121,6 @@ function Services() {
         setData('images', updatedFiles);
         setPreviews(newPreviews);
     };
-
-    useEffect(() => {
-        if (pricingTiers) {
-            setData('pricing_tiers', pricingTiers);
-        }
-    }, [pricingTiers]);
 
     return (
         <TopBar>
@@ -343,50 +324,50 @@ function Services() {
             </Card>
         </div>
         <Card title="Pricing Tiers">
-                                {data.pricing_tiers.map((tier, index) => (
-                                    <div key={index} className="mt-4">
-                                        <h4 className="text-lg font-semibold text-gray-800">{tier.name}</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-gray-600">Price</label>
-                                                <p className="text-gray-700">{tier.price}</p>
-                                                {isEditingAdditional && (
-                                                    <input
-                                                        type="text"
-                                                        name={`pricing_tiers[${index}].price`}
-                                                        value={tier.price}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...data.pricing_tiers];
-                                                            newTiers[index].price = e.target.value;
-                                                            setData('pricing_tiers', newTiers);
-                                                        }}
-                                                        className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <label className="block text-gray-600">Description</label>
-                                                <p className="text-gray-700">{tier.description}</p>
-                                                {isEditingAdditional && (
-                                                    <textarea
-                                                        name={`pricing_tiers[${index}].description`}
-                                                        value={tier.description}
-                                                        onChange={(e) => {
-                                                            const newTiers = [...data.pricing_tiers];
-                                                            newTiers[index].description = e.target.value;
-                                                            setData('pricing_tiers', newTiers);
-                                                        }}
-                                                        rows="2"
-                                                        className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </Card>
+    {['Basic', 'Standard', 'Premium'].map((tierName, index) => (
+        <div key={index} className="mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">{tierName}</h3>
+            <p className="text-gray-700">{data.pricing_tiers[index]?.price || 'No price available'}</p>
+            <p className="text-gray-700">{data.pricing_tiers[index]?.description || 'No description available'}</p>
+            {isEditingAdditional && (
+                <div className="mt-2 space-y-2">
+                    <input
+                        type="text"
+                        name={`pricing_tiers[${index}].price`}
+                        placeholder="Price"
+                        value={data.pricing_tiers[index]?.price || ''}
+                        onChange={(e) => {
+                            const newTiers = [...data.pricing_tiers];
+                            if (!newTiers[index]) {
+                                newTiers[index] = { name: tierName, price: '', description: '' };
+                            }
+                            newTiers[index].price = e.target.value;
+                            setData('pricing_tiers', newTiers);
+                        }}
+                        className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <textarea
+                        name={`pricing_tiers[${index}].description`}
+                        placeholder="Description"
+                        value={data.pricing_tiers[index]?.description || ''}
+                        onChange={(e) => {
+                            const newTiers = [...data.pricing_tiers];
+                            if (!newTiers[index]) {
+                                newTiers[index] = { name: tierName, price: '', description: '' };
+                            }
+                            newTiers[index].description = e.target.value;
+                            setData('pricing_tiers', newTiers);
+                        }}
+                        className="w-full border rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
+            )}
+        </div>
+    ))}
+</Card>
+
     </Card>
-); 
+
                         
                        
                      

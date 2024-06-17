@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Link } from '@inertiajs/react';
 
-const TopBar = () => {
+const TopBar = ({children}) => {
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -26,7 +26,8 @@ const TopBar = () => {
   };
 
   return (
-    <header className={`z-10 py-4 bg-white shadow-md ${darkMode ? 'dark:bg-gray-800' : ''}`}>
+    <>
+    <header className={`z-10 py-4 bg-white sticky top-0 shadow-md ${darkMode ? 'dark:bg-gray-800' : ''}`}>
       <div className="container flex items-center justify-between h-full px-6 mx-auto text-purple-600 dark:text-purple-300">
         {/* Mobile hamburger */}
         <button
@@ -283,7 +284,8 @@ const TopBar = () => {
         </ul>
       </div>
     </header>
-   
+    {children}
+  </>
   );
 };
 
