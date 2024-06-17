@@ -1,82 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '@mui/material';
-import picture from '../../../../public/Images/pic-3.png';
+import { Link } from '@inertiajs/inertia-react'; // Import Link from @inertiajs/inertia-react
 
-function Cardbox() {
-    const [loading, setLoading] = useState(true);
+function CardBox({ provider }) {
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Simulate loading data
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 2000);
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
-        // Clear timeout on component unmount
-        return () => clearTimeout(timer);
-    }, []);
+  return (
+    <div className="w-full bg-white border border-gray-200 rounded-lg shadow p-4">
+      {loading ? (
+        <div>
+          <Skeleton variant="rectangular" width="100%" height={125} className="rounded-md mb-4" />
+          <Skeleton variant="text" width="80%" />
+          <Skeleton variant="text" width="60%" />
+        </div>
+      ) : (
+        <div>
+          <img src={provider.image} alt="Service" className="w-full h-32 object-cover rounded-md mb-4" />
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">{provider.user_name}</h2>
+          <p className="text-gray-600 mb-4">{provider.service_name}</p>
+          <div className="flex items-center mb-4">
+            {[...Array(4)].map((_, index) => (
+              <svg key={index} className="w-4 h-4 text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 15.27l-5.18 2.73 1-5.81-4.23-4.12 5.85-.85L10 .5l2.61 5.72 5.85.85-4.23 4.12 1 5.81L10 15.27z" />
+              </svg>
+            ))}
+            <svg className="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 15.27l-5.18 2.73 1-5.81-4.23-4.12 5.85-.85L10 .5l2.61 5.72 5.85.85-4.23 4.12 1 5.81L10 15.27z" />
+            </svg>
+            <span className="ml-2 text-gray-600">{provider.rating}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-bold text-gray-900">Ksh {provider.price}</span>
+            <Link href={`/description/${provider.id}`} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Reach out</Link>
 
-    return (
-        <>
-            {loading ? (
-                <div className="w-68 m-3 border border-gray-200 rounded-lg shadow dark:border-gray-700">
-                    <Skeleton
-                        variant="rectangular"
-                        width="92%"
-                        height={125} 
-                     
-                        sx={{
-                            borderRadius: '10px',
-                            margin:'10px',
-                            animation: 'sway 2s ease-in-out infinite',
-                        }}
-                    />
-                    <div className="px-5 pb-5">
-                        <Skeleton variant="text" width={100} height={20} />
-                        <Skeleton variant="text" width={180} height={20} />
-                        <Skeleton variant="rectangular" width={60} height={20} />
-                        <Skeleton variant="text" width={100} height={20} />
-                        <Skeleton variant="rectangular" width={100} height={40} />
-                    </div>
-                </div>
-            ) : (
-                <div className="bg-gray-100 w-68 m-3 border border-gray-200 rounded-lg shadow dark:border-gray-700">
-                    <div className='flex justify-normal p-3'>
-                        <img  src={picture} alt="product image" className='w-full h-32' />
-                    </div>
-                    <div className="px-5 pb-5">
-                        <a href="#">
-                            <p className="font-semibold tracking-tight text-gray-900">Sam</p>
-                            <p className="font-semibold tracking-tight text-gray-900">Make up artist</p>
-                        </a>
-                        <div className="flex items-center mt-2.5 mb-5">
-                        <div class="flex items-center space-x-1 rtl:space-x-reverse">
-                <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-                <svg class="w-4 h-4 text-gray-200 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-            </div>
-                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3">5.0</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold text-gray-900">Ksh 100</span>
-                            <a href="#" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Reach out</a>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default Cardbox;
+export default CardBox;

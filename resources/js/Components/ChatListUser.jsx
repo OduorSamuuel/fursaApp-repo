@@ -1,36 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, usePage } from "@inertiajs/react";
 import ProfilePictureOnChat from "@/Components/Chat/ProfilePictureOnChat.jsx";
 import clsx from "clsx";
+import SearchChatBar from './Chat/SearchChatBar';
 
 export default function ChatListUser() {
     const { chat_with: chatWithUser, auth } = usePage().props;
     const { data: users } = usePage().props.users;
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredUsers = searchQuery ? users.filter(user => 
+        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) : users;
 
     return (
         <>
-            <div className="flex-1 mt-3 overflow-y-auto" scroll-region="true">
-                {
-                    users.map((user) => {
-                        let chat = null;
-                        const receiveMessage = user?.receive_messages?.length > 0 && user?.receive_messages[0];
-                        const sendMessage = user?.send_messages?.length > 0 && user?.send_messages[0];
+            <SearchChatBar setSearchQuery={setSearchQuery} />
+            <div className="flex-1 mt-3 overflow-y-auto">
+                {filteredUsers.length === 0 && searchQuery && (
+                    <div className="text-gray-400 text-center mt-3">
+                        User not found
+                    </div>
+                )}
+                {filteredUsers.map((user, index) => {
+                    let chat = null;
+                    const receiveMessage = user?.receive_messages?.length > 0 && user?.receive_messages[0];
+                    const sendMessage = user?.send_messages?.length > 0 && user?.send_messages[0];
 
-                        if (receiveMessage && sendMessage) chat = receiveMessage?.id > sendMessage?.id ? receiveMessage : sendMessage;
-                        else if (receiveMessage) chat = receiveMessage;
-                        else if (sendMessage) chat = sendMessage;
+                    if (receiveMessage && sendMessage) chat = receiveMessage?.id > sendMessage?.id ? receiveMessage : sendMessage;
+                    else if (receiveMessage) chat = receiveMessage;
+                    else if (sendMessage) chat = sendMessage;
 
-                        return <Link preserveScroll key={user.uuid} href={route('chat.show', user.uuid)}
-                                className={clsx(user.id === chatWithUser?.id ? 'bg-gray-800' : 'bg-transparent', 'flex w-full items-center hover:bg-gray-800/60 px-2.5 py-3 rounded-md')}>
+                    return (
+                        <Link preserveScroll key={user.uuid} href={route('chat.show', user.uuid)}
+                            className={clsx(user.id === chatWithUser?.id ? 'bg-gradient-to-r from-purple-400 to-blue-500' : 'bg-gradient-to-r from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400', 'flex w-full items-center px-2.5 py-2 rounded-md mb-2')}>
                             <div className="items-center mr-3 flex-2">
-                                <ProfilePictureOnChat user={user}/>
+                                <ProfilePictureOnChat user={user} />
                             </div>
                             <div className="flex flex-col flex-1 min-w-0 pr-2">
                                 <div className="flex items-center justify-between">
-                                    <div className="text-gray-100 text-sm font-medium truncate mb-1.5">
+                                    <div className={clsx(user.id === chatWithUser?.id ? 'text-white' : 'text-gray-800', 'text-sm font-medium truncate mb-1.5')}>
                                         {user.name}
                                     </div>
-                                    <div className="text-[10px] text-gray-400 mb-1">
+                                    <div className="text-xs text-gray-400 mb-1">
                                         {chat?.sent_at}
                                     </div>
                                 </div>
@@ -56,9 +68,9 @@ export default function ChatListUser() {
                                 </div>
                             </div>
                         </Link>
-                    })
-                }
+                    );
+                })}
             </div>
         </>
-    )
+    );
 }
