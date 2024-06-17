@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Inertia\Inertia;
 
+use App\Http\Controllers\TestEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,9 +84,13 @@ Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])
 });
 
 
+
 Route::get('/register', function () {
     return Inertia::render('Auth/RegisterClient');
 })->name('register.client');
+Route::get('/verify-my-email', function () {
+    return Inertia::render('Auth/VerifyEmail');
+});
 
 Route::get('auth/google',[GoogleAuthController::class, 'redirect'])->name('google-auth');
 Route::get('auth/google/call-back',[GoogleAuthController::class, 'callback']);
@@ -112,6 +117,9 @@ Route::get('/admin/locked', function () {
 Route::get('/page-error/{fakeUrl}', function () {
     return Inertia::render('Errors/NotFound');
 })->name('error');
+
+Route::get('/test-email', [TestEmailController::class, 'index'])->name('test-email');
+Route::post('/send-test-email', [TestEmailController::class, 'send']);
 
 
 require __DIR__.'/auth.php';

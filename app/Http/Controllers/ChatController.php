@@ -10,9 +10,10 @@ use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\Chat;
-
+use Illuminate\Support\Facades\Auth;
 class ChatController extends Controller
 {
+   
     public function index()
     {
         return inertia('Chat/Index', [
@@ -20,6 +21,7 @@ class ChatController extends Controller
         ]);
     }
 
+    
     public function show(User $user)
     {
         if ($user->id === auth()->id()) {

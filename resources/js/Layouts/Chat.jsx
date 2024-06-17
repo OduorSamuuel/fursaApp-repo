@@ -53,12 +53,18 @@ export default function App ({ children}) {
                  <div className="  py-6" style={{ height: '550px ' }}>
                      <div className="flex h-full overflow-hidden border border-gray-700 rounded-lg shadow">
                          <div className={renderSidebarScreen()}>
+                           
+                           
                              <MineProfileChat auth={auth} />
                              <SearchChatBar />
-                             <ChatListUser   />
+                            
+                         
+                           
+                           
+                            
                          </div>
 
-                         {children}
+                    {children}      
                        
                      
 

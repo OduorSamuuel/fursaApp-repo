@@ -38,7 +38,7 @@ const OtpVerification = ({ userId }) => {
       }
     } catch (error) {
       console.error('Error occurred during OTP verification:', error); // Debug statement
-      setError('Invalid hgvhgOTP');
+      setError('Invalid gOTP.');
     }
     setLoading(false);
   };

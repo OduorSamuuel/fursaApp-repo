@@ -27,6 +27,7 @@ class RegisteredUserController extends Controller
     {
         return Inertia::render('Auth/RegisterClient');
     }
+
     public function storeClient(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -55,6 +56,9 @@ class RegisteredUserController extends Controller
                 'is_admin' => false,
             ]);
 
+            // Dispatch Registered event
+            event(new Registered($user));
+
             $tokenLink = route('verification', ['token' => $verificationToken]);
 
             try {
@@ -69,6 +73,7 @@ class RegisteredUserController extends Controller
             return back()->with('error', 'Something went wrong during user creation. Please try again.');
         }
     }
+
     public function storeServiceProvider(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -101,6 +106,9 @@ class RegisteredUserController extends Controller
                 'is_verified' => false,
                 'is_admin' => true,
             ]);
+
+            // Dispatch Registered event
+            event(new Registered($user));
     
             ServiceProvider::create([
                 'user_id' => $user->id,
@@ -120,7 +128,7 @@ class RegisteredUserController extends Controller
             $tokenLink = route('verification', ['token' => $verificationToken]);
     
             try {
-                Mail::to($user->email)->send(new UserVerification($tokenLink));
+                Mail::to($request->email)->send(new UserVerification($tokenLink));
             } catch (\Exception $e) {
                 DB::rollBack();
                 return back()->with('error', 'Registration successful, but the verification email could not be sent.');
@@ -134,9 +142,8 @@ class RegisteredUserController extends Controller
             return back()->with('error', 'Something went wrong during user creation. Please try again.');
         }
     }
-    
 
-private function generateUniqueVerificationToken()
+    private function generateUniqueVerificationToken()
     {
         // Generate a unique verification token here
         return Str::random(60);

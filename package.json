@@ -33,11 +33,11 @@
         "@inertiajs/inertia-react": "^0.8.1",
         "@mui/material": "^5.15.18",
         "@soketi/soketi": "^1.6.0",
+        "animate.css": "^4.1.1",
         "clsx": "^2.0.0",
-        "daisyui": "^4.11.1",
         "lodash": "^4.17.21",
-        "react-social-login-buttons": "^4.1.0",
         "react-spinners": "^0.13.8",
-        "sweetalert2": "^11.11.0"
+        "sweetalert2": "^11.11.0",
+        "sweetalert2-react-content": "^5.0.7"
     }
 }
