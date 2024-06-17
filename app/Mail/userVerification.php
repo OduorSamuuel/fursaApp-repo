@@ -29,6 +29,7 @@ class UserVerification extends Mailable
      */
     public function build()
     {
+     
         return $this->view('verification')
             ->subject('Verification Email')
             ->with([
