@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, Searchable;
@@ -28,10 +29,11 @@ class User extends Authenticatable
         'token_expiration_time',
         'is_verified',
         'is_admin',
-        'otp',               
-        'otp_expires_at',  
+        'otp',
+        'otp_expires_at',
+        'contact_number',  // Added contact_number
+        'image',  // Added image
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -94,4 +96,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(ServiceProvider::class);
     }
+    
+    // Method to retrieve personal access tokens
+ 
+    // Method to retrieve password reset tokens
+  
+
+    // Method to retrieve failed jobs
+  
 }
