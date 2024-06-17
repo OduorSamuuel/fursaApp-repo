@@ -76,6 +76,8 @@ class Kernel extends HttpKernel
         'role' => \App\Http\Middleware\RoleMiddleware::class, 
         'admin.otp' => \App\Http\Middleware\AdminOtpVerification::class,
         'ensure.screen.unlocked' => \App\Http\Middleware\EnsureScreenIsUnlocked::class,
+        'cors' => \App\Http\Middleware\Cors::class,  // Register your CORS middleware here
     ];
+    
     
 }

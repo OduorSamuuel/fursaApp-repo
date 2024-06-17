@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class Services extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'title',
+        'name',
+        'category',
     ];
 
-    // Define the relationship with the User model
-    public function user()
+    public function serviceProviders()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(ServiceProvider::class);
     }
 }

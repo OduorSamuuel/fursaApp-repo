@@ -17,6 +17,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MpesaController;
 
+use App\Http\Controllers\TestEmailController;
 
 /*
 |--------------------------------------------------------------------------
@@ -124,6 +125,7 @@ Route::get('/page-error/{fakeUrl}', function () {
 Route::get('/test-email', [TestEmailController::class, 'index'])->name('test-email');
 Route::post('/send-test-email', [TestEmailController::class, 'send']);
 
+<<<<<<< HEAD
 Route::get('/accounts', [UserController::class, 'show'])->name('accounts');
 
 //Route::get('/accounts/appointments', [UserController::class, 'appointments'])->name('appointments.index');
@@ -161,6 +163,8 @@ Route::get('/test',function(){
     return Inertia::render('Test');
 });
 
+=======
+>>>>>>> cb992c00687d85ca97bf77d46806649eef2126d8
 
 require __DIR__.'/auth.php';
 

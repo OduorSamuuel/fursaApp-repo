@@ -16,4 +16,5 @@ createInertiaApp({
         root.render(<App {...props} />);
     },
     progress: false,
+    
 });

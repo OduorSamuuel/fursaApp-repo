@@ -56,7 +56,7 @@ const RegisterServiceProvider = () => {
         </Backdrop>
         <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
           <h2 className="text-3xl font-semibold mb-6 text-center text-gray-800">Create an account</h2>
-       
+
           {data.success && (
             <p className="text-green-500 mb-4 text-sm">{data.success}</p>
           )}
@@ -186,7 +186,11 @@ const RegisterServiceProvider = () => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-700">Registration Rules</h3>
             <ul className="list-disc list-inside text-gray-600 mt-2">
+<<<<<<< HEAD
+              <li >All fields must be filled.</li>
+=======
               <li>All fields must be filled.</li>
+>>>>>>> eee7b9e30bec05c50a2d443b03ecf5780bf67bfc
               <li>Password must be a minimum of 8 characters.</li>
               <li>Passwords must match.</li>
             </ul>

@@ -5,6 +5,8 @@ function Appointments( {auth}) {
   return (
   < Layout auth={auth}>
   This is the layout page
+
+  
   </Layout>
   )
 }

@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Admin extends Model
+class Payment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'title',
+        'service_request_id',
+        'amount',
+        'payment_datetime',
     ];
 
-    // Define the relationship with the User model
-    public function user()
+    public function serviceRequest()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(ServiceRequest::class);
     }
 }
