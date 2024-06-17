@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CircularProgress, Backdrop } from '@mui/material';
 import { Link, useForm } from '@inertiajs/react';
@@ -15,6 +14,8 @@ const RegisterClient = () => {
     email: '',
     password: '',
     password_confirmation: '',
+    image: '',
+    contact_number: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -25,9 +26,18 @@ const RegisterClient = () => {
     setData(name, value);
   };
 
+  const handleImageChange = (e) => {
+    setData('image', e.target.files[0]);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
     post('/register-client', {
+      data: {
+        ...data,
+        contact_number: `254${data.contact_number}`, // Add prefix here if needed
+      },
       onSuccess: () => {
         setData('success', 'Registration successful. Check your email for verification');
         setTimeout(() => {
@@ -103,7 +113,6 @@ const RegisterClient = () => {
                     onClick={toggleShowPassword}
                   />
                 </div>
-
                 <InputError message={errors.password} className="mt-2" />
               </div>
               <div className="mt-4 relative">
@@ -126,6 +135,32 @@ const RegisterClient = () => {
                 </div>
                 <InputError message={errors.password_confirmation} className="mt-2" />
               </div>
+              <div className="mt-4">
+                <InputLabel htmlFor="image" value="Profile Image" />
+                <TextInput
+                  id="image_input"
+                  type="file"
+                  accept="image/*"
+                  name="image"
+                  className="mt-1 block w-full pr-10"
+                  onChange={handleImageChange}
+                />
+                <InputError message={errors.image} className="mt-2" />
+              </div>
+              <div className="mt-4">
+                <InputLabel htmlFor="contact_number" value="Phone Number" />
+                <TextInput
+                  id="contact_number"
+                  name="contact_number"
+                  value={data.contact_number}
+                  className="mt-1 block w-full"
+                  onChange={handleChange}
+                  maxLength={9}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                />
+                <InputError message={errors.contact_number} className="mt-2" />
+              </div>
             </div>
             <div className="mt-6">
               <PrimaryButton type="submit" disabled={processing} className="w-full">
@@ -136,11 +171,7 @@ const RegisterClient = () => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-700">Registration Rules</h3>
             <ul className="list-disc list-inside text-gray-600 mt-2">
-<<<<<<< HEAD
-              <li className=' text-red-00'>All fields must be filled.</li>
-=======
-              <li>All fields must be filled.</li>
->>>>>>> eee7b9e30bec05c50a2d443b03ecf5780bf67bfc
+              <li className="text-red-00">All fields must be filled.</li>
               <li>Password must be a minimum of 8 characters.</li>
               <li>Passwords must match.</li>
             </ul>
