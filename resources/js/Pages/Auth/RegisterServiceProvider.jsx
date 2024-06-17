@@ -186,7 +186,11 @@ const RegisterServiceProvider = () => {
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-gray-700">Registration Rules</h3>
             <ul className="list-disc list-inside text-gray-600 mt-2">
+<<<<<<< HEAD
               <li >All fields must be filled.</li>
+=======
+              <li>All fields must be filled.</li>
+>>>>>>> eee7b9e30bec05c50a2d443b03ecf5780bf67bfc
               <li>Password must be a minimum of 8 characters.</li>
               <li>Passwords must match.</li>
             </ul>
