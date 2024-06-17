@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm, usePage } from "@inertiajs/react";
+import { colors } from '@mui/material';
 
 export default function ChatInputMessage(props) {
     const { chat_with: chatWithUser } = usePage().props;
@@ -56,14 +57,19 @@ export default function ChatInputMessage(props) {
                     name="message"
                     id="message"
                     autoComplete="off"
-                    className="flex-1 py-1.5 text-xs lg:text-sm text-white bg-transparent border-0 rounded-md focus:ring-0"
+                    className="flex-1 py-1.5 text-xs lg:text-sm text-white  bg-slate-400 border-0 rounded-md focus:ring-0"
                     placeholder="Type a message"
                     value={data.message}
                     rows={1}
                     onChange={handleInputChange}
                     onKeyDown={customKeyEvent}
                     onKeyUp={onTyping}
-                    style={{ maxHeight: '100px', resize: 'none', overflowY: data.message ? 'auto' : 'hidden' }}
+                    style={{ 
+                        maxHeight: '100px', 
+                        resize: 'none', 
+                        overflowY: data.message ? 'auto' : 'hidden', 
+                        placeholderColors: <colors className="white"></colors>
+                    }}
                 />
 
                 <button type="submit" disabled={processing} className="flex items-center justify-center w-8 h-8 -mt-1 text-gray-900 transition duration-150 rotate-45 rounded-full lg:w-10 lg:h-10 hover:text-green-300 focus:outline-none">
