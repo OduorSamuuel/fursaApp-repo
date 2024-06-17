@@ -5,8 +5,9 @@ import ChatListUser from "@/Components/ChatListUser.jsx";
 import { router, usePage } from "@inertiajs/react";
 import { debounce } from "lodash";
 import Layout from './Layout';
+import Accounts from './Accounts/Accounts';
 
-export default function App ({ children}) {
+export default function App({ children }) {
     const { auth } = usePage().props;
 
     useEffect(() => {
@@ -36,50 +37,29 @@ export default function App ({ children}) {
 
     const renderSidebarScreen = () => {
         const currentPath = route().current();
-        let className = "px-5 py-2 pb-5 lg:w-1/3  lg:border-r lg:border-gray-700 bg-slate-700 "
+        let className = "px-5 py-2 pb-5 lg:w-1/3 lg:border-r lg:border-gray-300   bg-violet-300 ";
 
-        if (currentPath === 'chat.index') className += "flex flex-col w-full "
-        else  className += "hidden flex-col lg:flex"
+        if (currentPath === 'chat.index') className += "flex flex-col w-full";
+        else className += "hidden flex-col lg:flex";
 
         return className;
-    }
+    };
 
     return (
- 
-     <Layout auth={auth}>
-
-     
-     <div className="px-6 mx-auto max-w-screen-2xl xl:px-0 ml-6 mr-6   "  >
-                 <div className="  py-6" style={{ height: '550px ' }}>
-                     <div className="flex h-full overflow-hidden border border-gray-700 rounded-lg shadow">
-                         <div className={renderSidebarScreen()}>
-                           
-                           
-                             <MineProfileChat auth={auth} />
-                             <SearchChatBar />
-                            
-                         
-                           
-                           
-                            
-                         </div>
-
-                    {children}      
-                       
-                     
-
-                     </div>
-                 </div>
-             </div>
-
-       
-         </Layout>
-   
-      
-           
-
-       
-
-       
-    )
+        <Layout auth={auth}>
+            <Accounts>
+                <div className="px-6 mx-auto max-w-screen-2xl xl:px-0  ">
+                   
+                        <div className="flex  overflow-hidden  w-full h-96 shadow">
+                            <div className={renderSidebarScreen()}>
+                                <MineProfileChat auth={auth} />
+                                <ChatListUser />
+                            </div>
+                            {children}
+                        </div>
+                    
+                </div>
+            </Accounts>
+        </Layout>
+    );
 }

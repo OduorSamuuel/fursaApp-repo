@@ -31,58 +31,30 @@ class RegisteredUserController extends Controller
     public function storeClient(Request $request)
 {
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $username = explode('@', $request->email)[0];
-        $verificationToken = Str::random(60);
-
-        try {
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $username,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'uuid' => Str::uuid(),
-                'verification_token' => $verificationToken,
-                'token_expiration_time' => now()->addHours(24),
-                'is_verified' => false,
-                'is_admin' => false,
-            ]);
-
-            // Dispatch Registered event
-            event(new Registered($user));
-
-            $tokenLink = route('verification', ['token' => $verificationToken]);
-
-            try {
-                Mail::to($user->email)->send(new UserVerification($tokenLink));
-            } catch (\Exception $e) {
-                return back()->with('error', 'Registration successful, but the verification email could not be sent.');
-            }
-
-            return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Something went wrong during user creation. Please try again.');
-        }
+    // Validate incoming request data
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email',
+        'password' => ['required', 'confirmed', 'min:8'],
+        'contact_number' => 'required|string',
+        'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    ]);
+//dd($request->all());
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
     }
 
-    public function storeServiceProvider(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => ['required', 'confirmed', 'min:8'],
-            'company_name' => 'required|string|max:255',
-            'service_type' => 'required|string|max:255',
-            'contact_number' => 'required|string|max:15',
-            'address' => 'required|string|max:255',
-        ]);
-    
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+    $username = explode('@', $request->email)[0];
+    $verificationToken = Str::random(60);
+
+    try {
+        // Handling the image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->move(public_path('image-uploads'), $filename);
+        } else {
+            return redirect()->back()->with('error', 'Image upload failed.');
         }
 
        
@@ -112,53 +84,94 @@ class RegisteredUserController extends Controller
         $tokenLink = route('verification', ['token' => $verificationToken]);
 
         try {
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $username,
-                'email' => $request->email,
-                'password' => bcrypt($request->password),
-                'uuid' => Str::uuid(),
-                'verification_token' => $verificationToken,
-                'token_expiration_time' => now()->addHours(24),
-                'is_verified' => false,
-                'is_admin' => true,
-            ]);
+            Mail::to($user->email)->send(new UserVerification($tokenLink));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Registration successful, but the verification email could not be sent.');
+        }
 
-            // Dispatch Registered event
-            event(new Registered($user));
-    
-            ServiceProvider::create([
-                'user_id' => $user->id,
-                'company_name' => $request->company_name,
-                'service_type' => $request->service_type,
-                'contact_number' => $request->contact_number,
-                'address' => $request->address,
-                'is_approved' => false,
-            ]);
-    
-            Admin::create([
-                'user_id' => $user->id,
-                'title' => 'serviceprovider_admin',
-                'contact_number' => $request->contact_number,
-            ]);
-    
-            $tokenLink = route('verification', ['token' => $verificationToken]);
-    
-            try {
-                Mail::to($request->email)->send(new UserVerification($tokenLink));
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return back()->with('error', 'Registration successful, but the verification email could not be sent.');
-            }
-    
-            DB::commit();
-            return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
-    
+        return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Something went wrong during user creation. Please try again.');
+    }
+}    
+    public function storeServiceProvider(Request $request)
+{
+   // dd($request->all());
+    $validator = Validator::make($request->all(), [
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users,email',
+        'password' => ['required', 'confirmed', 'min:8'],
+        'company_name' => 'required|string|max:255',
+        'service_type' => 'required|string|max:255',
+        'contact_number' => 'required|string', // Remove 'fullPhoneNumber' from validation rules
+        'address' => 'required|string|max:255',
+        'county_id' => 'nullable|exists:counties,id',
+        'service_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+//dd($validator);
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    $username = explode('@', $request->email)[0];
+    $verificationToken = Str::random(60);
+    $fullPhoneNumber = '254' . $request->contact_number;
+    DB::beginTransaction();
+    try {
+        $user = User::create([
+           'name' => $request->name,
+            'username' => $username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'contact_number' => $fullPhoneNumber, 
+            'image' => 'null',
+            'uuid' => Str::uuid(),
+            'verification_token' => $verificationToken,
+            'token_expiration_time' => now()->addHours(24),
+            'is_verified' => false,
+            'is_admin' => true,
+        ]);
+//dd($user);
+        // Dispatch Registered event
+        event(new Registered($user));
+
+        // Concatenate '254' with contact_number before storing
+     
+//dd($fullPhoneNumber);
+        $serviceProvider = ServiceProvider::create([
+            'user_id' => $user->id,
+            'company_name' => $request->company_name,
+            'service_type' => $request->service_type,
+            'contact_number' => $fullPhoneNumber,
+            'address' => $request->address,
+            'is_approved' => false,
+            'county_id' => $request->county_id,
+        ]);
+
+        Admin::create([
+            'user_id' => $user->id,
+            'title' => 'serviceprovider_admin',
+        ]);
+
+        $tokenLink = route('verification', ['token' => $verificationToken]);
+
+        try {
+            Mail::to($request->email)->send(new UserVerification($tokenLink));
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Registration successful, but the verification email could not be sent.');
         }
+
+        DB::commit();
+        return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong during user creation. Please try again.');
     }
+}
+
 
     private function generateUniqueVerificationToken()
     {
