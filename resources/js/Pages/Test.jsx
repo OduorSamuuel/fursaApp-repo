@@ -1,19 +1,14 @@
 
-import React from 'react';
-import { Inertia } from '@inertiajs/inertia';
+import React from 'react'
+import Layout from '@/Layouts/Layout';
 
-const Test = ({ status }) => {
-    const sendTestEmail = () => {
-        Inertia.post('/send-test-email');
-    };
+function Test({auth}) {
+  return (
+<Layout auth={auth}>
+<h1>Test</h1>
 
-    return (
-        <div>
-            <h1>Send Test Email</h1>
-            {status && <p>{status}</p>}
-            <button onClick={sendTestEmail}>Send Test Email</button>
-        </div>
-    );
-};
+</Layout>
+  )
+}
 
-export default Test;
+export default Test

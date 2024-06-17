@@ -66,9 +66,12 @@ export default function Show() {
 
     return (
         <>
+        <App>
+
+      
             <Head title="Chat " />
 
-            <div className="flex flex-col w-full lg:w-2/3 bg-gray-500">
+            <div className="flex flex-col w-full lg:w-2/3 bg-gradient-to-r from-blue-500 to-purple-500 text-white">
                 <div className="px-6 py-5 border-b  border-gray-700">
                     <div className="flex items-center justify-between">
                         <HeaderUserChatBox
@@ -95,7 +98,7 @@ export default function Show() {
                         <div className="flex items-center py-2 border-t border-gray-700 px-9">
                             <div className="flex items-center justify-between w-full px-2 py-1.5 bg-gray-700/50 border-gray-600 border-l-4 rounded">
                                 <div className="text-[10px] lg:text-xs">
-                                    <div className="mb-1 text-purple-400">
+                                    <div className="mb-1 text-purple-200">
                                         {reply.sender_id === auth.user.id ? 'You' : chatWithUser.name}
                                     </div>
                                     <div className="overflow-hidden text-gray-300/80" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
@@ -120,8 +123,9 @@ export default function Show() {
                     />
                 </div>
             </div>
+            </App>
         </>
     )
 }
 
-Show.layout = (page) => <App children={page}/>;
+
