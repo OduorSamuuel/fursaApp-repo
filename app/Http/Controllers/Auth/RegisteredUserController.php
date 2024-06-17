@@ -29,12 +29,7 @@ class RegisteredUserController extends Controller
     }
 
     public function storeClient(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => ['required', 'confirmed', 'min:8'],
-        ]);
+{
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -89,11 +84,33 @@ class RegisteredUserController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-    
-        $username = explode('@', $request->email)[0];
-        $verificationToken = Str::random(60);
-    
-        DB::beginTransaction();
+
+       
+        $number_prefix = '254';
+      
+        $fullContactNumber = $number_prefix . $request->contact_number;
+
+
+
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'contact_number' => $fullContactNumber, // Save with prefix added
+            'image' => 'image-uploads/' . $filename,
+            'uuid' => Str::uuid(),
+            'verification_token' => $verificationToken,
+            'token_expiration_time' => now()->addHours(24),
+            'is_verified' => false,
+            'is_admin' => false,
+        ]);
+
+        // Dispatch Registered event
+        event(new Registered($user));
+
+        $tokenLink = route('verification', ['token' => $verificationToken]);
+
         try {
             $user = User::create([
                 'name' => $request->name,
@@ -139,7 +156,7 @@ class RegisteredUserController extends Controller
     
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Something went wrong during user creation. Please try again.');
+            return back()->with('error', 'Registration successful, but the verification email could not be sent.');
         }
     }
 

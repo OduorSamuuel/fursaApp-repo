@@ -16,6 +16,7 @@ use Inertia\Inertia;
 use App\Mail\SendOtp;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+ use Illuminate\Support\Facades\Session;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -33,15 +34,20 @@ class AuthenticatedSessionController extends Controller
     /**
      * Show the OTP verification page.
      */
-    public function showOtpVerificationPage($encodedString)
-    {
-        $userId = $this->decodeString($encodedString);
-        if (!$userId) {
-            return abort(404);
-        }
+  
 
-        return Inertia::render('Auth/OtpVerification', ['userId' => $encodedString]);
-    }
+     public function showOtpVerificationPage($encodedString)
+     {
+         $userId = $this->decodeString($encodedString);
+         if (!$userId) {
+             return abort(404);
+         }
+     
+         $otpSentMessage = session('otp_sent_message'); // Retrieve the session data
+         return Inertia::render('Auth/OtpVerification', ['userId' => $encodedString, 'otpSentMessage' => $otpSentMessage]);
+     }
+     
+    
 
     /**
      * Handle an incoming authentication request.

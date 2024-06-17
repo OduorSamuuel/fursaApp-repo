@@ -3,6 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+<<<<<<< HEAD
+use App\Http\Controllers\MpesaController;
+=======
+>>>>>>> cb992c00687d85ca97bf77d46806649eef2126d8
 
 /*
 |--------------------------------------------------------------------------
@@ -20,5 +24,10 @@ use Illuminate\Support\Facades\Mail;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+<<<<<<< HEAD
+Route::post('v1/access/token', [MpesaController::class, 'generateAccessToken']);
+Route::post('v1/hlab/stk/push', [MpesaController::class, 'STKPush']);
+=======
+>>>>>>> cb992c00687d85ca97bf77d46806649eef2126d8
 
 
