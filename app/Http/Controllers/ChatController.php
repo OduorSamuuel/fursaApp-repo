@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Events\NewMessageEvent;
@@ -10,15 +9,17 @@ use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\Chat;
+use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
     public function index()
     {
         return inertia('Chat/Index', [
-            'users' => UserCollection::make($this->getChatWithUser()),
+            'users' => UserCollection::make($this->getAllUsersWithChatData()),
         ]);
     }
+    
 
     public function show(User $user)
     {
@@ -36,7 +37,7 @@ class ChatController extends Controller
         }
 
         return inertia('Chat/Show', [
-            'users' => UserCollection::make($this->getChatWithUser()),
+            'users' => UserCollection::make($this->getAllUsersWithChatData()),
             'chat_with' => UserResource::make($user),
             'messages' => $this->loadMessages($user),
         ]);
@@ -70,15 +71,10 @@ class ChatController extends Controller
         return redirect()->back();
     }
 
-    private function getChatWithUser()
+    private function getAllUsersWithChatData()
     {
         return User::query()
-            ->whereHas('receiveMessages', function ($query) {
-                $query->where('sender_id', auth()->id());
-            })
-            ->orWhereHas('sendMessages', function ($query) {
-                $query->where('receiver_id', auth()->id());
-            })
+            ->where('id', '!=', auth()->id())  // Exclude the current user
             ->withCount(['messages' => fn($query) => $query->where('receiver_id', auth()->id())->whereNull('seen_at')])
             ->with([
                 'sendMessages' => function ($query) {
