@@ -13,6 +13,8 @@ class Payment extends Model
         'service_request_id',
         'amount',
         'payment_datetime',
+        'MerchantRequestID',
+        'CheckoutRequestID',
     ];
 
     public function serviceRequest()

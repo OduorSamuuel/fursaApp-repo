@@ -1,12 +1,10 @@
 <?php
-
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ServiceProvider extends Model
+class ServiceProviders extends Model
 {
     use HasFactory;
 
@@ -23,7 +21,7 @@ class ServiceProvider extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function county()
@@ -45,9 +43,9 @@ class ServiceProvider extends Model
     {
         return $this->hasOne(ServiceDetails::class, 'service_provider_id');
     }
-    public function ratings()
-{
-    return $this->hasMany(Rating::class);
-}
-}
 
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+}

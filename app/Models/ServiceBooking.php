@@ -17,9 +17,11 @@ class ServiceBooking extends Model
         'user_id',
         'service_provider_id',
         'service_request_id',
+        'booking_date',
+        'location',
         'status',
         'amount',
-        'notes',
+        'payment_status',
     ];
 
     public function user()

@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,8 +15,10 @@ class CreateRatingsTable extends Migration
     {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('service_provider_id');
-            $table->foreign('service_provider_id')->references('id')->on('service_providers')->onDelete('cascade');
+            $table->unsignedBigInteger('service_providers_id');
+            $table->foreign('service_providers_id')->references('id')->on('service_providers')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id'); // Add user_id field
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'); // Reference to users table
             $table->unsignedTinyInteger('rating'); // Assuming ratings are from 1 to 5
             $table->text('comment')->nullable();
             $table->timestamps();
@@ -28,7 +31,7 @@ class CreateRatingsTable extends Migration
      * @return void
      */
     public function down()
-    {
+ {
         Schema::dropIfExists('ratings');
     }
 }
