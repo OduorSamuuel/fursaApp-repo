@@ -3,43 +3,21 @@ import { usePage, useForm } from '@inertiajs/react';
 import { Inertia } from '@inertiajs/inertia';
 import { toast } from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faSave, faTimes,faSpinner } from '@fortawesome/free-solid-svg-icons';
 import SidebarLayout from '@/Layouts/Admin/SidebarLayout';
 import TopBar from '@/Layouts/Admin/TopBar';
 import Card from '../../../Components/Card';
+import Sidebar from '@/Layouts/Admin/Sidebar';
 
-function Services() {
-    const { provider, serviceDetails, countyName,pricingTiers,counties, availability: initialAvailability } = usePage().props;
-    console.log(counties);
+function ServiceParody() {
+    const { provider, serviceDetails, countyName,counties, pricingTiers, availability: initialAvailability } = usePage().props;
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const [isEditingAdditional, setIsEditingAdditional] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [serviceName, setServiceName] = useState('');
     const [previews, setPreviews] = useState([null, null, null]);
-    const [availability, setAvailability] = useState(initializeAvailability(initialAvailability));
 
-    // Initialize availability with default values for each day
-    function initializeAvailability(initial) {
-        const availabilityData = {};
-        daysOfWeek.forEach(day => {
-            const initialData = initial.find(item => item.day_of_week.toLowerCase() === day.toLowerCase());
-            availabilityData[day.toLowerCase()] = initialData ? {
-                open_time: initialData.open || '',
-                close_time: initialData.close || '',
-                closed: initialData.closed === '1',
-            } : { open_time: '', close_time: '', closed: false };
-        });
-        return availabilityData;
-    }
-
-    useEffect(() => {
-        // Initialize availability data if availableData is provided
-        if (initialAvailability && initialAvailability.length > 0) {
-            setAvailability(initializeAvailability(initialAvailability));
-        }
-    }, [initialAvailability]);
-
-    const { data, setData, processing, errors,progress,put } = useForm({
+    const { data, setData, processing, errors, progress, put } = useForm({
         company_name: provider?.company_name || '',
         service_type: provider?.service_type || '',
         contact_number: provider?.contact_number || '',
@@ -56,12 +34,31 @@ function Services() {
                       { name: 'Standard', price: '', description: '' },
                       { name: 'Premium', price: '', description: '' },
                   ],
+        availability: initializeAvailability(initialAvailability),
     });
+
+    function initializeAvailability(initial) {
+        const availabilityData = {};
+        daysOfWeek.forEach(day => {
+            const initialData = initial.find(item => item.day_of_week.toLowerCase() === day.toLowerCase());
+            availabilityData[day.toLowerCase()] = initialData ? {
+                open_time: initialData.open || '',
+                close_time: initialData.close || '',
+                closed: initialData.closed === '1',
+            } : { open_time: '', close_time: '', closed: false };
+        });
+        return availabilityData;
+    }
+
     useEffect(() => {
         if (pricingTiers) {
             setData('pricing_tiers', pricingTiers);
         }
-    }, [pricingTiers]);
+        if (initialAvailability && initialAvailability.length > 0) {
+            setData('availability', initializeAvailability(initialAvailability));
+        }
+    }, [pricingTiers, initialAvailability]);
+
     const handleEdit = () => {
         if (isEditing) {
             put(route('admin.services.update', provider.id), {
@@ -78,6 +75,7 @@ function Services() {
             setIsEditing(true);
         }
     };
+
     const handleChange = (e) => {
         setData(e.target.name, e.target.value);
     };
@@ -102,6 +100,7 @@ function Services() {
         setData('images', updatedFiles);
         setPreviews(newPreviews);
     };
+
     const handleRemoveImage = (index) => {
         const newPreviews = [...previews];
         const updatedFiles = [...data.images];
@@ -112,16 +111,17 @@ function Services() {
         setData('images', updatedFiles);
         setPreviews(newPreviews);
     };
+
     const handleEditAdditional = () => {
         if (isEditingAdditional) {
             const formData = new FormData();
 
             // Prepare availability data as an array of days
-            const availabilityArray = Object.keys(availability).map(day => ({
+            const availabilityArray = Object.keys(data.availability).map(day => ({
                 day_of_week: day,
-                open_time: availability[day].open_time,
-                close_time: availability[day].close_time,
-                closed: availability[day].closed ? '1' : '0', // Convert boolean to '1' or '0'
+                open_time: data.availability[day].open_time,
+                close_time: data.availability[day].close_time,
+                closed: data.availability[day].closed ? '1' : '0', // Convert boolean to '1' or '0'
             }));
 
             availabilityArray.forEach((avail, index) => {
@@ -131,7 +131,7 @@ function Services() {
                 formData.append(`availability[${index}][closed]`, avail.closed);
             });
 
-            pricingTiers.forEach((tier, index) => {
+            data.pricing_tiers.forEach((tier, index) => {
                 formData.append(`pricing_tiers[${index}][name]`, tier.name);
                 formData.append(`pricing_tiers[${index}][price]`, tier.price);
                 formData.append(`pricing_tiers[${index}][description]`, tier.description);
@@ -159,34 +159,28 @@ function Services() {
     };
 
     const handleAvailabilityChange = (day, field, value) => {
-        if (field === 'closed') {
-            // Handle checkbox toggle for closed status
-            const updatedAvailability = {
-                ...availability,
-                [day]: {
-                    ...availability[day],
-                    closed: value,
-                    open_time: value ? '' : availability[day].open_time,
-                    close_time: value ? '' : availability[day].close_time,
-                },
-            };
+        const updatedAvailability = { ...data.availability };
 
-            setAvailability(updatedAvailability);
+        if (field === 'closed') {
+            updatedAvailability[day] = {
+                ...updatedAvailability[day],
+                closed: value,
+                open_time: value ? '' : updatedAvailability[day].open_time,
+                close_time: value ? '' : updatedAvailability[day].close_time,
+            };
         } else {
-            // Handle time input changes
-            setAvailability(prevAvailability => ({
-                ...prevAvailability,
-                [day]: {
-                    ...prevAvailability[day],
-                    [field]: value,
-                },
-            }));
+            updatedAvailability[day] = {
+                ...updatedAvailability[day],
+                [field]: value,
+            };
         }
+
+        setData('availability', updatedAvailability);
     };
 
     return (
         <TopBar>
-    
+    <Sidebar>
             <div className="max-w-4xl mx-auto p-8 bg-white shadow-md rounded-lg">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Your Service</h2>
@@ -277,11 +271,11 @@ function Services() {
                                     onChange={handleChange}
                                     className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                  {counties.map((county) => (
-                                            <option key={county.id} value={county.id}>
-                                                {county.name}
-                                            </option>
-                                        ))}
+                                    {counties.map((county) => (
+                                        <option key={county.id} value={county.id}>
+                                            {county.name}
+                                        </option>
+                                    ))}
                                 </select>
                             )}
                         </Card>
@@ -301,49 +295,47 @@ function Services() {
                     </button>
 
         </div>
-      
         <Card title="Availability">
-                    <div className="mt-4">
-                        {daysOfWeek.map(day => (
-                            <div key={day} className="mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">{day}</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-gray-700">Open Time</label>
-                                        <input
-                                            type="time"
-                                            className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            disabled={!isEditingAdditional || availability[day.toLowerCase()].closed}
-                                            value={availability[day.toLowerCase()].open_time || ''}
-                                            onChange={e => handleAvailabilityChange(day.toLowerCase(), 'open_time', e.target.value)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-gray-700">Close Time</label>
-                                        <input
-                                            type="time"
-                                            className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            disabled={!isEditingAdditional || availability[day.toLowerCase()].closed}
-                                            value={availability[day.toLowerCase()].close_time || ''}
-                                            onChange={e => handleAvailabilityChange(day.toLowerCase(), 'close_time', e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="col-span-2 flex items-center mt-2">
-                                        <input
-                                            type="checkbox"
-                                            className="mr-2"
-                                            disabled={!isEditingAdditional}
-                                            checked={availability[day.toLowerCase()].closed || false}
-                                            onChange={e => handleAvailabilityChange(day.toLowerCase(), 'closed', e.target.checked)}
-                                        />
-                                        <label className="text-gray-700">Closed</label>
-                                    </div>
+                <div className="mt-4">
+                    {daysOfWeek.map(day => (
+                        <div key={day} className="mb-4">
+                            <h3 className="text-lg font-semibold text-gray-700">{day}</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-gray-700">Open Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        disabled={!isEditingAdditional || data.availability[day.toLowerCase()].closed}
+                                        value={data.availability[day.toLowerCase()].open_time || ''}
+                                        onChange={e => handleAvailabilityChange(day.toLowerCase(), 'open_time', e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-gray-700">Close Time</label>
+                                    <input
+                                        type="time"
+                                        className="w-full border rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        disabled={!isEditingAdditional || data.availability[day.toLowerCase()].closed}
+                                        value={data.availability[day.toLowerCase()].close_time || ''}
+                                        onChange={e => handleAvailabilityChange(day.toLowerCase(), 'close_time', e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-span-2 flex items-center mt-2">
+                                    <input
+                                        type="checkbox"
+                                        className="mr-2"
+                                        disabled={!isEditingAdditional}
+                                        checked={data.availability[day.toLowerCase()].closed || false}
+                                        onChange={e => handleAvailabilityChange(day.toLowerCase(), 'closed', e.target.checked)}
+                                    />
+                                    <label className="text-gray-700">Closed</label>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </Card>
-
+                        </div>
+                    ))}
+                </div>
+            </Card>
            <div className='mt-3 mb-3'>
            <Card title="Description" >
                 <p className="text-gray-700 ">{serviceDetails ? serviceDetails.service_description : ''}</p>
@@ -358,6 +350,7 @@ function Services() {
             </Card>
            
            </div>
+       
        
        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-3">
@@ -470,9 +463,9 @@ function Services() {
                               
             </div>
 
-      
+            </Sidebar>
     </TopBar>
     );
 }
 
-export default Services;
+export default ServiceParody;

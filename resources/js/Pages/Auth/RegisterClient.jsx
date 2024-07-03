@@ -147,19 +147,21 @@ const RegisterClient = () => {
                 />
                 <InputError message={errors.image} className="mt-2" />
               </div>
-              <div className="mt-4">
-                <InputLabel htmlFor="contact_number" value="Phone Number" />
-                <TextInput
-                  id="contact_number"
-                  name="contact_number"
-                  value={data.contact_number}
-                  className="mt-1 block w-full"
-                  onChange={handleChange}
-                  maxLength={9}
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                />
-                <InputError message={errors.contact_number} className="mt-2" />
+              <div className="relative flex">
+                
+                <span className="inline-flex h-10 items-center px-3 mt-1 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                  +{254}
+                </span>
+               <TextInput
+  id="contact_number"
+  name="contact_number"
+  value={data.contact_number}
+  className="mt-1 h-10 block w-full rounded-l-none"
+  onChange={handleChange}
+  maxLength={9}
+  inputMode="numeric" // This attribute restricts input to numeric characters
+  pattern="[0-9]*" // This attribute further enforces numeric input
+/>
               </div>
             </div>
             <div className="mt-6">

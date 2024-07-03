@@ -8,7 +8,6 @@ import TextInput from '@/Components/TextInput';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-
 const RegisterServiceProvider = () => {
   const { data, setData, post, processing, errors } = useForm({
     name: '',
@@ -21,7 +20,7 @@ const RegisterServiceProvider = () => {
     address: '',
     country_code: '254',
     county_id: '',
-    service_category: '',
+    service_category: '', // Ensure this is initialized properly
     service_image: null,
   });
 
@@ -41,17 +40,26 @@ const RegisterServiceProvider = () => {
       setCategories(response.data);
     });
   }, []);
+  useEffect(() => {
+    if (selectedCategory) {
+      setData('service_category', selectedCategory);
+      //console.log("selectedCategory ahahaha", selectedCategory);
+    }
+  }, [selectedCategory]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setData(name, value);
 
     if (name === 'service_category') {
       setSelectedCategory(value);
+      setData('service_category', value); 
+      console.log(value); // Update service_category in form data
       setData('service_type', '');
       axios.get(route('services.byCategory', value)).then(response => {
         setServices(response.data);
       });
+    } else {
+      setData(name, value); // Update other form fields
     }
   };
 
@@ -59,28 +67,24 @@ const RegisterServiceProvider = () => {
     setData('service_image', e.target.files[0]);
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  const fullPhoneNumber = `${data.country_code}${data.contact_number}`;
-  console.log('Full Phone Number:', fullPhoneNumber);
-  post('/register', {
-    data: {
-      ...data,
-      contact_number: fullPhoneNumber,
-    },
-    onSuccess: () => {
-      setData('success', 'Registration successful. Check your email for verification.');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
-    },
-  });
-};
-
-
-
-
-  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const fullPhoneNumber = `${data.country_code}${data.contact_number}`;
+    console.log(data);
+    post('/register', {
+      data: {
+        ...data,
+        contact_number: fullPhoneNumber,
+      },
+   
+      onSuccess: () => {
+        setData('success', 'Registration successful. Check your email for verification.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      },
+    });
+  };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -155,29 +159,28 @@ const handleSubmit = (e) => {
               <div>
                 <MuiInputLabel htmlFor="service_category">Service Category</MuiInputLabel>
                 <FormControl fullWidth className="mt-1">
-  <Select
-    id="service_category"
-    name="service_category"
-    value={data.service_category}
-    onChange={handleChange}
-    displayEmpty
-    className="input-field"
-    renderValue={() => {
-      if (selectedCategory === '') {
-        return '- Select Category -';
-      } else {
-        return selectedCategory;
-      }
-    }}
-  >
-    {categories.map((category, index) => (
-      <MenuItem key={index} value={category.category}>
-        {category.category}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-
+                  <Select
+                    id="service_category"
+                    name="service_category"
+                    value={data.service_category}
+                    onChange={handleChange}
+                    displayEmpty
+                    className="input-field"
+                    renderValue={() => {
+                      if (selectedCategory === '') {
+                        return '- Select Category -';
+                      } else {
+                        return selectedCategory;
+                      }
+                    }}
+                  >
+                    {categories.map((category, index) => (
+                      <MenuItem key={index} value={category.category}>
+                        {category.category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
                 <InputError message={errors.service_category} className="mt-2" />
               </div>
               {selectedCategory && (
@@ -212,8 +215,7 @@ const handleSubmit = (e) => {
                     id="county_id"
                     name="county_id"
                     value={data.county_id}
-                    onChange={handleChange
-                    }
+                    onChange={handleChange}
                     displayEmpty
                     className="input-field"
                   >
@@ -230,28 +232,25 @@ const handleSubmit = (e) => {
                 <InputError message={errors.county_id} className="mt-2" />
               </div>
               <div>
-              <InputLabel htmlFor="contact_number" value="Contact Number" />
-              <div className="relative flex">
-                
-                <span className="inline-flex h-10 items-center px-3 mt-1 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                  +{data.country_code}
-                </span>
-               <TextInput
-  id="contact_number"
-  name="contact_number"
-  value={data.contact_number}
-  className="mt-1 h-10 block w-full rounded-l-none"
-  onChange={handleChange}
-  maxLength={9}
-  inputMode="numeric" // This attribute restricts input to numeric characters
-  pattern="[0-9]*" // This attribute further enforces numeric input
-/>
+                <InputLabel htmlFor="contact_number" value="Contact Number" />
+                <div className="relative flex">
+                  <span className="inline-flex h-10 items-center px-3 mt-1 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                    +{data.country_code}
+                  </span>
+                  <TextInput
+                    id="contact_number"
+                    name="contact_number"
+                    value={data.contact_number}
+                    className="mt-1 h-10 block w-full rounded-l-none"
+                    onChange={handleChange}
+                    maxLength={9}
+                    inputMode="numeric" // This attribute restricts input to numeric characters
+                    pattern="[0-9]*" // This attribute further enforces numeric input
+                  />
+                </div>
+                <InputError message={errors.contact_number} className="mt-2" />
               </div>
-              
-                            <InputError message={errors.contact_number} className="mt-2" />
-                            <div>
-              </div>
-             
+              <div>
                 <InputLabel htmlFor="service_image" value="Service Image" />
                 <input
                   type="file"
