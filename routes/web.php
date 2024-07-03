@@ -16,6 +16,8 @@ use App\Models\Chat;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\MpesaController;
+use App\Http\Controllers\RatingController;
+use App\Http\Controllers\AdminController;
 
 
 /*
@@ -60,9 +62,7 @@ Route::get('/appointments', function () {
 Route::get('/about', function () {
     return Inertia::render('About');
 });
-Route::get('/services', function () {
-    return Inertia::render('Services');
-});
+Route::get('/services', [ServiceController::class, 'allServices'])->name('services');
 Route::get('/provider', function () {
     return Inertia::render('Auth/RegisterServiceProvider');
 });
@@ -81,9 +81,12 @@ Route::get('/admin/services', [ServiceController::class, 'services'])->name('adm
 Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 // Routes for general admin
 Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return Inertia::render('Admin/Admin');
-    })->name('gen_admin');
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::post('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
+    Route::post('/users/{id}/assign-role', [AdminController::class, 'assignRole'])->name('users.assignRole');
+   
+   ;
 });
 
 
@@ -128,7 +131,7 @@ Route::get('/accounts', [UserController::class, 'show'])->name('accounts');
 //Route::get('/accounts/appointments', [UserController::class, 'appointments'])->name('appointments.index');
 
 
-Route::put('/accounts/update', [UserController::class, 'update'])->name('accounts.update');
+Route::post('/accounts/update', [UserController::class, 'update'])->name('accounts.update');
 
 Route::get('/account-details', [UserController::class, 'show'])->name('account.details');
 Route::get('/admin/account-details', [UserController::class, 'profiledetails'])->name('account.details');
@@ -145,6 +148,8 @@ Route::get('/services/{category}', [ServiceProviderController::class, 'getServic
 Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::post('admin/services/{id}/updateadditional', [ServiceController::class, 'updateAdditional'])->name('admin.services.updateadditional');
 Route::get('/description/{id}', [ServiceController::class, 'getDescription'])->name('description');
+
+
     
 Route::post('/confirm-booking', [BookingController::class, 'confirmBooking'])->name('confirm-booking');
 Route::get('/order-confirmation', [BookingController::class, 'getBookingData'])->name('order-confirmation');
@@ -153,13 +158,56 @@ Route::post('/appointments', [AppointmentController::class, 'store'])->name('app
 
 
     Route::post('/perform-stk-push', [MpesaController::class, 'performStkPush'])->name('perform-stk-push');
-   
+    //Route::get('/mpesa/stk/callback', [MpesaController::class, 'handleStkCallback'])->name('mpesa.stk.callback');
+
     Route::get('/querystk-push', [MpesaController::class, 'queryStkPush'])->name('query.stk.push');
 
 Route::get('/test',function(){
     return Inertia::render('Test');
 });
+Route::post('/booking',[BookingController::class, 'index'])->name('booking.store');
+Route::get('/booking-confirmation', [BookingController::class, 'confirmation'])->name('booking.confirmation');
+Route::post('/booking-summary', [BookingController::class, 'summary'])->name('booking.summary');
+Route::get('/summary', [BookingController::class, 'viewSummary'])->name('booking.view');
+Route::post('/payment', [BookingController::class, 'payment'])->name('booking.payment');
+Route::get('/payment-module', [MpesaController::class, 'paymentProcess'])->name('payment.process');
+Route::post('/booked', [BookingController::class, 'createBooking'])->name('booking.create');
+Route::get('/rating/{serviceDetailId}', [RatingController::class, 'index'])->name('ratings.index');
+Route::post('/rate-provider', [RatingController::class, 'store'])->name('ratings.store');
 
+Route::get('/booking-payment',function(){
+    Return Inertia::render('BookingPayment');
+});
+Route::post('/booking-processing',[BookingController::class, 'processPayment'])->name('booking.process');
+
+
+Route::get('/booking-success',function(){
+    Return Inertia::render('BookingSuccess');
+});
+Route::get('/accounts/transactions',function(){
+    Return Inertia::render('Accounts/Transactions');
+});
+
+Route::get('/admin/reports',function(){
+    Return Inertia::render('Admin/Super/Reports');
+});
+Route::get('/admin/chats',function(){
+    Return Inertia::render('Admin/Super/Chat');
+});
+Route::get('/admin/payments',function(){
+    Return Inertia::render('Admin/Super/Payments');
+});
+Route::get('/admin/settings',function(){
+    Return Inertia::render('Admin/Super/Settings');
+});
+Route::get('/admin/customers',[AdminController::class, 'providers'])->name('providers.index');
+Route::get('/booking-done',[MpesaController::class, 'processBooking'])->name('booking.store1');
+Route::put('/admin/superc-providers/{id}', [AdminController::class, 'update'])
+    ->name('admin.super.service-providers.update');
+
+// Delete a service provider
+Route::delete('/admin/super/service-providers/{id}', [AdminController::class, 'destroy'])
+    ->name('admin.super.service-providers.destroy');
 
 require __DIR__.'/auth.php';
 
