@@ -2,42 +2,27 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
 
 use Illuminate\Support\Facades\DB;
-use App\Models\Booking;
-use App\Models\Room;
+
+use App\Models\User;
+
+use App\Models\Payment;
+use App\Models\ServiceProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ServiceDetails;
+use App\Models\ServiceRequest;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 
-class MpesaController extends Controller
-{ public $formData = [];
 
-    public function show(Request $request)
-    {
-        $this->formData= [
-            'roomId' => $request->input('roomId'),
-            'check_in' => $request->input('check_in'),
-            'check_out' => $request->input('check_out'),
-            'adults' => $request->input('adults'),
-            'child' => $request->input('child'),
-            'rooms' => $request->input('rooms'),
-            'PricePerNight' => $request->input('PricePerNight'),
-        ];
-    
-        $numberOfNights = $this->calculatePrice($this->formData);
-        $totalPrice = $this->calculateTotalPrice($this->formData);
-    
-        $this->formData['nights'] = $numberOfNights;
-        $this->formData['pricePerNightCalculated'] = $totalPrice;
-    
-        cache(['form_data1' => $this->formData], now()->addMinutes(30));
-    
-        return view('payment.payment', ['formData1' => $this->formData]);
-    }
-    
-   
+
+class MpesaController extends Controller
+{ 
+
    
     private function getAccessToken()
     {
@@ -61,14 +46,14 @@ class MpesaController extends Controller
 
 
 public function performStkPush(Request $request)
-{
-    // Debugging: Output the received request data
-    //dd($request->all());
+{//dd($request->all());
+   
+    
 
     $access_token = $this->getAccessToken();
 
     $processRequestUrl = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
-    $callbackUrl = 'https://2865-149-34-244-170.ngrok-free.app';
+    $callbackUrl = 'https://e419-41-80-118-229.ngrok-free.app';
     $passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
     $businessShortCode = '174379';
     $timestamp = now()->format('YmdHis');
@@ -76,9 +61,9 @@ public function performStkPush(Request $request)
     $password = base64_encode($businessShortCode . $passkey . $timestamp);
 
     // Get values from the request
-    $mpesaNumber = $request->mpesa_number;
-    $amount = $request->amount;
+    $mpesaNumber = $request->phoneNumber;
    
+    $amount = 1;
 
     $partyA = $mpesaNumber;
     $partyB = '174379';
@@ -102,6 +87,7 @@ public function performStkPush(Request $request)
     ];
 
     $response = Http::withHeaders($stkPushHeader)->post($processRequestUrl, $curlPostData);
+   
 
     $responseData = $response->json();
     $checkoutRequestID = $responseData['CheckoutRequestID'];
@@ -109,9 +95,12 @@ public function performStkPush(Request $request)
 
     if ($responseCode == "0") {
         // Store the $checkoutRequestID in the cache for 60 minutes (adjust as needed)
-        Cache::put('checkoutRequestID', $checkoutRequestID, 60);
-dd("Hello, $checkoutRequestID");
-        return Inertia::render('PaymentModal');
+       
+        Cache::put('checkoutRequestID', $checkoutRequestID, now()->addMinutes(30));
+       Cache::put('bookingData', $request->all(), now()->addMinutes(30));
+       // dd("this is the cached session id: " . Session::get('checkoutRequestID'));
+
+        return redirect()->route('payment.process');
     } else {
         return view('payment.failed', ['message' => 'Payment failed. Please try again.']);
     }
@@ -119,6 +108,120 @@ dd("Hello, $checkoutRequestID");
 
     // STK push callback functionality
     // STK push callback functionality
+
+    public function queryStkPush(Request $request)
+    {
+        $checkoutRequestID = Cache::get('checkoutRequestID');
+        $access_token = $this->getAccessToken();
+    
+        // Set API endpoint and credentials
+        $queryUrl = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+        $businessShortCode = '174379';
+        $timestamp = now()->format('YmdHis');
+        $passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
+        $password = base64_encode($businessShortCode . $passkey . $timestamp);
+    
+        // Set headers and request payload
+        $queryHeader = ['Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $access_token];
+        $curlPostData = [
+            'BusinessShortCode' => $businessShortCode,
+            'Password' => $password,
+            'Timestamp' => $timestamp,
+            'CheckoutRequestID' => $checkoutRequestID,
+        ];
+    
+        $response = Http::withHeaders($queryHeader)->post($queryUrl, $curlPostData);
+       
+        $responseData = $response->json();
+       
+        
+    
+        if (isset($responseData['ResultCode'])) {
+            $resultCode = $responseData['ResultCode'];
+    
+            // Process result codes and set appropriate messages
+            switch ($resultCode) {
+                case '1037':
+                    $message = "Timeout in completing transaction";
+                    break;
+    
+                case '1032':
+                    $message = "Transaction cancelled by user";
+                    $responseData =$response->json();
+                    Cache::put('responseData', $responseData, now()->addMinutes(30));
+                    break;
+    
+                case '1':
+                    $message = "Insufficient balance for the transaction";
+                    break;
+    
+                case '0':
+                    $message = "Transaction was successful";
+                    Cache::put('checkoutRequestID', $checkoutRequestID, now()->addMinutes(30));
+                    break;
+    
+                default:
+                    $message = "Unhandled ResultCode: $resultCode";
+                    break;
+            }
+    
+            // Return JSON response with resultCode and message
+            return response()->json(['resultCode' => $resultCode, 'message' => $message, 'responseData' => $responseData]);
+        }
+    
+        // Return a generic message if no ResultCode is found
+        return response()->json(['message' => 'No ResultCode found in response.']);
+    }
+
+public function paymentProcess(){
+
+    Return inertia::render('PaymentProcessing');
+}
+
+public function processBooking(Request $request)
+{
+    $responseData = Cache::get('responseData');
+   
+    $bookingData = Cache::get('bookingData');
+    //dd($bookingData);
+    $serviceDetailId = $bookingData['bookingSummary']['bookingData']['service_detail_id'];
+
+    // Fetch service_provider_id from the ServiceDetails table
+    $serviceDetail = ServiceDetails::findOrFail($serviceDetailId);
+    $serviceProviderId = $serviceDetail->service_provider_id;
+    $bookingDateTime = Carbon::createFromFormat('Y-m-d h:i A', $bookingData['bookingSummary']['selectedDate'] . ' ' . $bookingData['bookingSummary']['selectedTime'])
+    ->format('Y-m-d H:i:s');
+
+    $serviceRequest = ServiceRequest::create([
+        'user_id' => auth()->id(),
+        'service_provider_id' => $serviceProviderId,
+        'service_detail_id' => $serviceDetailId,
+        'booking_date' => $bookingDateTime,
+        'location' => $bookingData['bookingSummary']['bookingData']['provider']['address'],
+        'status' => 'Pending',
+        'amount' => $bookingData['totalCost'],
+        'payment_status' => 'Pending',
+    ]);
+    // Insert data into payments
+    $payment = Payment::create([
+        'service_request_id' => $serviceRequest->id,
+        'amount' => $bookingData['totalCost'],
+        'payment_datetime' => now(),
+        'MerchantRequestID' => $responseData['MerchantRequestID'],
+        'CheckoutRequestID' => $responseData['CheckoutRequestID'],
+    ]);
+   
+
+    // Update the payment status to Paid if ResponseCode is 0
+    if ($responseData['ResponseCode'] == '0') {
+        $serviceRequest->update(['payment_status' => 'Paid']);
+      
+    }
+    
+
+
+    return inertia::render('BookingSuccess');
+}
 public function handleStkCallback(Request $request)
 {
     $stkCallbackResponse = $request->getContent();
@@ -150,120 +253,5 @@ public function handleStkCallback(Request $request)
     return response()->json(['status' => 'payment.success'], 200);
 }
 
-
-    public function queryStkPush(Request $request)
-{
-  
-  
-
-  
-    $access_token = $this->getAccessToken();
-
-    // Set API endpoint and credentials
-    $queryUrl = 'https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query';
-    $businessShortCode = '174379';
-    $timestamp = now()->format('YmdHis');
-    $passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919";
-    $password = base64_encode($businessShortCode . $passkey . $timestamp);
-    $checkoutRequestID = Cache::get('checkoutRequestID');
-
-    // Set headers and request payload
-    $queryHeader = ['Content-Type' => 'application/json', 'Authorization' => 'Bearer ' . $access_token];
-    $curlPostData = [
-        'BusinessShortCode' => $businessShortCode,
-        'Password' => $password,
-        'Timestamp' => $timestamp,
-        'CheckoutRequestID' => $checkoutRequestID,
-    ];
-
-  
-    $response = Http::withHeaders($queryHeader)->post($queryUrl, $curlPostData);
-    $responseData = $response->json();
-
-  
-    if (isset($responseData['ResultCode'])) {
-        $resultCode = $responseData['ResultCode'];
-
-        // Process result codes
-        switch ($resultCode) {
-            case '1037':
-                $message = "1037 Timeout in completing transaction";
-                break;
-
-            case '1032':
-                $formDataFromCache = Cache::get('form_data1');
-                $message = $this->handleTransactionCancelled($formDataFromCache);
-                break;
-
-            case '1':
-                $message = "1 The balance is insufficient for the transaction";
-                break;
-
-            case '0':
-                $message = "0 The transaction was successful";
-                Cache::put('checkoutRequestID', $checkoutRequestID, 60);
-                break;
-
-            default:
-                $message = "Unhandled ResultCode: $resultCode";
-                break;
-        }
-
-        return $message;
-    }
-}
-
-private function handleTransactionCancelled($formDataFromCache)
-{
-    try {
-      
-        $userIdInSession = session('user_id');
-
-   
-
-        // Prepare booking data
-        $bookingData = [
-
-            'RoomID' => $formDataFromCache['roomId'] ?? null,
-            'UserID' => $userIdInSession,
-            'CheckInDate' => $formDataFromCache['check_in'] ?? null,
-            'Adult' => $formDataFromCache['adults'] ?? null,
-            'Children' => $formDataFromCache['child'] ?? null,
-            'CheckOutDate' => $formDataFromCache['check_out'] ?? null,
-            'TotalPrice' =>$formDataFromCache['pricePerNightCalculated'],
-        ];
-       
-
-
-       // $userEmail = DB::table('users')->where('id', $userIdInSession)->value('email');
-
-
-       
-   
-        try {
-            DB::table('booking')->insert($bookingData);
-        } catch (\Exception $e) {
-            \Log::error('Error creating booking: ' . $e->getMessage());
-        }
-      
-        $room = Room::where('RoomId', $formDataFromCache['roomId'])->first();
-     
-      
-       
-        if ($room) {
-            $room->Status = 'booked';
-            $room->save();
-           
-         
-        } else {
-            $affectedRows = 0;
-            \Log::error('Room not found ');
-        }
-    } catch (\Exception $e) {
-        \Log::error('Exception updating room status: ' . $e->getMessage());
-    }
-
-    return view('bookingsuccess');
-}
 
     }

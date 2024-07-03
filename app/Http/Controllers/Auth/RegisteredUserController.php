@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\Validator;
 use App\Mail\UserVerification;
 use App\Models\Admin;
 use App\Models\Role;
-use App\Models\ServiceProvider;
+
+use App\Models\ServiceProviders;
+use App\Models\ServiceDetails;
+
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -95,21 +98,21 @@ class RegisteredUserController extends Controller
         return back()->with('error', 'Something went wrong during user creation. Please try again.');
     }
 }    
-    public function storeServiceProvider(Request $request)
-{
-   // dd($request->all());
+public function storeServiceProvider(Request $request)
+{//dd($request->all());
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users,email',
         'password' => ['required', 'confirmed', 'min:8'],
         'company_name' => 'required|string|max:255',
         'service_type' => 'required|string|max:255',
-        'contact_number' => 'required|string', // Remove 'fullPhoneNumber' from validation rules
+        'contact_number' => 'required|string',
         'address' => 'required|string|max:255',
         'county_id' => 'nullable|exists:counties,id',
         'service_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'service_category' => 'required|string|max:255', // Validate service_category
     ]);
-//dd($validator);
+
     if ($validator->fails()) {
         return redirect()->back()->withErrors($validator)->withInput();
     }
@@ -118,13 +121,14 @@ class RegisteredUserController extends Controller
     $verificationToken = Str::random(60);
     $fullPhoneNumber = '254' . $request->contact_number;
     DB::beginTransaction();
+
     try {
         $user = User::create([
-           'name' => $request->name,
+            'name' => $request->name,
             'username' => $username,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'contact_number' => $fullPhoneNumber, 
+            'contact_number' => $fullPhoneNumber,
             'image' => 'null',
             'uuid' => Str::uuid(),
             'verification_token' => $verificationToken,
@@ -132,14 +136,11 @@ class RegisteredUserController extends Controller
             'is_verified' => false,
             'is_admin' => true,
         ]);
-//dd($user);
+
         // Dispatch Registered event
         event(new Registered($user));
 
-        // Concatenate '254' with contact_number before storing
-     
-//dd($fullPhoneNumber);
-        $serviceProvider = ServiceProvider::create([
+        $serviceProvider = ServiceProviders::create([
             'user_id' => $user->id,
             'company_name' => $request->company_name,
             'service_type' => $request->service_type,
@@ -147,6 +148,13 @@ class RegisteredUserController extends Controller
             'address' => $request->address,
             'is_approved' => false,
             'county_id' => $request->county_id,
+        ]);
+
+        // Create ServiceDetails associated with the service provider
+        $serviceDetails = ServiceDetails::create([
+            'service_provider_id' => $serviceProvider->id,
+            'category' => $request->service_category, // Capture service_category here
+            'service_description' => 'Add your service description here', // Example, adjust as needed
         ]);
 
         Admin::create([
