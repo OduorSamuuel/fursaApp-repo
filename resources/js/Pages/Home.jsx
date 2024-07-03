@@ -7,6 +7,7 @@ import CardBox from '../Components/Services/Cardbox'; // Assuming this is the co
 
 export default function Home({ auth, laravelVersion, phpVersion }) {
   const { serviceProviders } = usePage().props;
+  
   console.log(serviceProviders);
 
   return (

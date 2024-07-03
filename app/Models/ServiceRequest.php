@@ -25,6 +25,19 @@ class ServiceRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+<<<<<<< HEAD
+=======
+    public function serviceProvider()
+    {
+        return $this->belongsTo(ServiceProviders::class);
+    }
+
+    public function appointment()
+    {
+        return $this->hasOne(Appointment::class);
+    }
+
+>>>>>>> 91006da72eb6664cb35fecf3231cb7b0c67ab617
     public function payment()
     {
         return $this->hasOne(Payment::class);

@@ -11,7 +11,10 @@ class Rating extends Model
 
     protected $fillable = [
         'service_providers_id',
+<<<<<<< HEAD
         'user_id',
+=======
+>>>>>>> 91006da72eb6664cb35fecf3231cb7b0c67ab617
         'rating',
         'comment',
     ];
@@ -19,9 +22,13 @@ class Rating extends Model
     public function serviceProvider()
     {
         return $this->belongsTo(ServiceProviders::class, 'service_providers_id');
+<<<<<<< HEAD
     }
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+=======
+>>>>>>> 91006da72eb6664cb35fecf3231cb7b0c67ab617
     }
+    
 }
