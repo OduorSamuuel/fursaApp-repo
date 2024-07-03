@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\ServiceProvider;
+use App\Models\ServiceRequest;
 
 class AppointmentController extends Controller
 {
@@ -34,18 +35,28 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $appointments = Appointment::where('user_id', Auth::id())
-            ->with('serviceProvider.user') // Eager load the serviceProvider and its user relationship
+        $serviceRequests = ServiceRequest::where('user_id', Auth::id())
+            ->with([
+                'serviceProvider.user', // Eager load the serviceProvider and its user relationship
+                'payment',
+                'serviceProvider.serviceDetails.images', // Eager load images related to serviceDetails
+            ])
             ->get();
     
-        // Optionally, iterate through each appointment and load the service provider's user name
-        $appointments->each(function ($appointment) {
-            $appointment->service_provider_user_name = $appointment->serviceProvider->user->name ?? 'Unknown'; // Handle case where user is not found
+        $serviceRequests->each(function ($serviceRequest) {
+            // Extract service provider user name
+            $serviceProviderUserName = $serviceRequest->serviceProvider->user->name ?? 'Unknown';
+            $serviceRequest->setAttribute('service_provider_user_name', $serviceProviderUserName);
+    
+            // Extract first image path from images relation of service details
+            $firstImagePath = $serviceRequest->serviceProvider->serviceDetails->images->first()->path ?? null;
+            $serviceRequest->setAttribute('first_image_path', $firstImagePath);
         });
     
-        //dd($appointments);
+   
+    
         return Inertia::render('Accounts/Appointments', [
-            'appointments' => $appointments
+            'serviceRequests' => $serviceRequests
         ]);
     }
-}
+}   

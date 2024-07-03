@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
-use App\Models\ServiceProvider;
+use App\Models\ServiceProviders;
 use Inertia\Inertia;
 use App\Mail\SendOtp;
 use Illuminate\Support\Facades\DB;
@@ -62,10 +62,12 @@ class AuthenticatedSessionController extends Controller
     
             if ($user->is_admin) {
                 $admin = Admin::where('user_id', $user->id)->first();
+    
                 if ($admin) {
-                    $serviceProvider = ServiceProvider::where('user_id', $user->id)->first();
-                    if ($serviceProvider) {
-                        if ($serviceProvider->is_approved) {
+                    if ($admin->title === 'serviceprovider_admin') {
+                        $serviceProvider = ServiceProviders::where('user_id', $user->id)->first();
+    
+                        if ($serviceProvider && $serviceProvider->is_approved) {
                             // Service provider admin and is verified
                             return $this->handleOtpVerification($user);
                         } else {
@@ -84,10 +86,11 @@ class AuthenticatedSessionController extends Controller
             // Handle validation errors (e.g., wrong password)
             return Redirect::back()->withErrors(['email' => 'Invalid email or password']);
         } catch (\Exception $e) {
-            // Handle other exceptions
+            dd($e);
             return Redirect::back()->withErrors(['email' => 'Something went wrong. Please try again.']);
         }
     }
+    
     
     protected function handleOtpVerification($user)
     {
