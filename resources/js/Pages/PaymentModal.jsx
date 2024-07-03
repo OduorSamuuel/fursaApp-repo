@@ -8,7 +8,7 @@ const PaymentModal = ({ isOpen, onClose, clientName }) => {
   const [loading, setLoading] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
-  const contactNumber = 254111978124;
+  const contactNumber = 254740759188;
   const servicePrice = 100;
 
   useEffect(() => {
