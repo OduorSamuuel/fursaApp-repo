@@ -73,26 +73,61 @@ class ChatController extends Controller
 
     private function getAllUsersWithChatData()
     {
-        return User::query()
-            ->where('id', '!=', auth()->id())  // Exclude the current user
-            ->withCount(['messages' => fn($query) => $query->where('receiver_id', auth()->id())->whereNull('seen_at')])
+        $currentUser = Auth::user();
+    
+        $query = User::query()
+            ->where('id', '!=', $currentUser->id);  // Exclude the current user
+    
+        // Apply role-based filters
+        if ($currentUser->admin && $currentUser->admin->title === 'general_admin') {
+            // General admin can see all service providers
+            $query->whereHas('serviceProvider');
+        } elseif ($currentUser->admin && $currentUser->admin->title === 'serviceprovider_admin') {
+            // Service provider admin can see users who have booked their services and general admins
+            $query->where(function ($q) use ($currentUser) {
+                $q->whereHas('serviceRequests', function ($sq) use ($currentUser) {
+                    $sq->where('service_provider_id', $currentUser->serviceProvider->id);
+                })->orWhereHas('admin', function ($aq) {
+                    $aq->where('title', 'general_admin');
+                });
+            });
+        } elseif ($currentUser->serviceProvider) {
+            // Service providers can see users who have booked their services and general admins
+            $query->where(function ($q) use ($currentUser) {
+                $q->whereHas('serviceRequests', function ($sq) use ($currentUser) {
+                    $sq->where('service_provider_id', $currentUser->id);
+                })->orWhereHas('admin', function ($aq) {
+                    $aq->where('title', 'general_admin');
+                });
+            });
+        } else {
+            // Regular user can only see service providers they've booked
+            $query->whereHas('serviceProvider', function ($q) use ($currentUser) {
+                $q->whereHas('serviceRequests', function ($sq) use ($currentUser) {
+                    $sq->where('user_id', $currentUser->id);
+                });
+            });
+        }
+    
+        $users = $query->withCount(['messages' => fn($query) => $query->where('receiver_id', $currentUser->id)->whereNull('seen_at')])
             ->with([
-                'sendMessages' => function ($query) {
-                    $query->whereIn('id', function ($query) {
+                'sendMessages' => function ($query) use ($currentUser) {
+                    $query->whereIn('id', function ($query) use ($currentUser) {
                         $query->selectRaw('max(id)')
                             ->from('chats')
-                            ->where('receiver_id', auth()->id())
+                            ->where('receiver_id', $currentUser->id)
                             ->groupBy('sender_id');
                     });
                 },
-                'receiveMessages' => function ($query) {
-                    $query->whereIn('id', function ($query) {
+                'receiveMessages' => function ($query) use ($currentUser) {
+                    $query->whereIn('id', function ($query) use ($currentUser) {
                         $query->selectRaw('max(id)')
                             ->from('chats')
-                            ->where('sender_id', auth()->id())
+                            ->where('sender_id', $currentUser->id)
                             ->groupBy('receiver_id');
                     });
                 },
+                'admin' // Eager load the admin relationship
             ])
             ->orderByDesc(function ($query) {
                 $query->select('created_at')
@@ -103,8 +138,19 @@ class ChatController extends Controller
                     ->limit(1);
             })
             ->get();
+    
+        // Add "(Admin)" to general admin names for service providers
+        if ($currentUser->serviceProvider || ($currentUser->admin && $currentUser->admin->title === 'serviceprovider_admin')) {
+            $users = $users->map(function ($user) {
+                if ($user->admin && $user->admin->title === 'general_admin') {
+                    $user->name .= ' (Admin)';
+                }
+                return $user;
+            });
+        }
+    
+        return $users;
     }
-
     private function loadMessages($user)
     {
         return Chat::query()

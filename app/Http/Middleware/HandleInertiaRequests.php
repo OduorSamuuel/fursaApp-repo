@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Middleware;
-
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
+use App\Models\User;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -30,10 +30,24 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
+        // Ensure the user is loaded with the admin relationship if the user is authenticated
+        if ($user) {
+            $user = User::with('admin')->find($user->id);
+        }
+
+        $adminTitle = null;
+    
+        if ($user && $user->is_admin) {
+            $adminTitle = $user->admin ? $user->admin->title : null;
+        }
+    
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'adminTitle' => $adminTitle,
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),

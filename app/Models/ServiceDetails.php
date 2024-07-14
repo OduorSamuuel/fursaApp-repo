@@ -18,7 +18,7 @@ class ServiceDetails extends Model
 
     public function serviceProvider()
     {
-        return $this->belongsTo(ServiceProviders::class);
+        return $this->belongsTo(ServiceProvider::class);
     }
 
     public function images()

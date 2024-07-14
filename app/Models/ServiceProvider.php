@@ -4,7 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ServiceProviders extends Model
+class ServiceProvider extends Model
 {
     use HasFactory;
 
@@ -17,22 +17,21 @@ class ServiceProviders extends Model
         'service_image',
         'is_approved',
         'county_id',
+        'latitude',
+        'longitude',
     ];
-
+/*
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
+*/
     public function county()
     {
         return $this->belongsTo(County::class);
     }
 
-    public function serviceRequests()
-    {
-        return $this->hasMany(ServiceRequest::class);
-    }
+   
 
     public function serviceBookings()
     {
@@ -48,4 +47,17 @@ class ServiceProviders extends Model
     {
         return $this->hasMany(Rating::class);
     }
+    public function userServiceRequests()
+{
+    return $this->hasMany(UserServiceRequest::class, 'service_provider_id');
+}
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+public function serviceRequests()
+{
+    return $this->hasMany(ServiceRequest::class);
+}
 }
