@@ -8,7 +8,7 @@ use App\Mail\UserVerification;
 use App\Models\Admin;
 use App\Models\Role;
 
-use App\Models\ServiceProviders;
+use App\Models\ServiceProvider;
 use App\Models\ServiceDetails;
 
 use App\Models\User;
@@ -99,7 +99,7 @@ class RegisteredUserController extends Controller
     }
 }    
 public function storeServiceProvider(Request $request)
-{//dd($request->all());
+{
     $validator = Validator::make($request->all(), [
         'name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users,email',
@@ -111,6 +111,8 @@ public function storeServiceProvider(Request $request)
         'county_id' => 'nullable|exists:counties,id',
         'service_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         'service_category' => 'required|string|max:255', // Validate service_category
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
     ]);
 
     if ($validator->fails()) {
@@ -140,12 +142,14 @@ public function storeServiceProvider(Request $request)
         // Dispatch Registered event
         event(new Registered($user));
 
-        $serviceProvider = ServiceProviders::create([
+        $serviceProvider = ServiceProvider::create([
             'user_id' => $user->id,
             'company_name' => $request->company_name,
             'service_type' => $request->service_type,
             'contact_number' => $fullPhoneNumber,
             'address' => $request->address,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
             'is_approved' => false,
             'county_id' => $request->county_id,
         ]);
@@ -176,10 +180,10 @@ public function storeServiceProvider(Request $request)
 
     } catch (\Exception $e) {
         DB::rollBack();
+        
         return back()->with('error', 'Something went wrong during user creation. Please try again.');
     }
 }
-
 
     private function generateUniqueVerificationToken()
     {

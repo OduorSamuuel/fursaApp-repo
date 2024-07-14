@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
-use App\Models\ServiceProviders;
+use App\Models\ServiceProvider;
 use Inertia\Inertia;
 use App\Mail\SendOtp;
 use Illuminate\Support\Facades\DB;
@@ -65,7 +65,7 @@ class AuthenticatedSessionController extends Controller
     
                 if ($admin) {
                     if ($admin->title === 'serviceprovider_admin') {
-                        $serviceProvider = ServiceProviders::where('user_id', $user->id)->first();
+                        $serviceProvider = ServiceProvider::where('user_id', $user->id)->first();
     
                         if ($serviceProvider && $serviceProvider->is_approved) {
                             // Service provider admin and is verified

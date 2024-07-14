@@ -10,6 +10,8 @@ use App\Models\ServiceProvider;
 use App\Models\ServiceDetails;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ServiceRequest;
+use App\Models\CancelledRequest;
+
 
 use App\Models\ServiceProviders;
 
@@ -191,5 +193,23 @@ public function createBooking(Request $request)
     $serviceRequest = ServiceRequest::create($bookingDataToInsert);
 
     return redirect()->route('appointments.index');
+}
+public function cancelService(Request $request, $id)
+{
+    $request->validate([
+        'reasons' => 'required|array',
+    ]);
+
+    $serviceRequest = ServiceRequest::findOrFail($id);
+    $serviceRequest->status = 'Cancelled by User';
+    $serviceRequest->save();
+
+    // Save the cancellation reasons
+    CancelledRequest::create([
+        'service_request_id' => $id,
+        'reasons' => json_encode($request->reasons),
+    ]);
+
+    return  redirect ()->back()->with('success', 'Service request cancelled successfully'); 
 }
 }

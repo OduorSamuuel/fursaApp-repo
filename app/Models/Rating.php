@@ -10,25 +10,25 @@ class Rating extends Model
     use HasFactory;
 
     protected $fillable = [
-        'service_providers_id',
-<<<<<<< HEAD
+        'service_provider_id',
+        'service_detail_id', // Added this line
         'user_id',
-=======
->>>>>>> 91006da72eb6664cb35fecf3231cb7b0c67ab617
         'rating',
         'comment',
     ];
 
     public function serviceProvider()
     {
-        return $this->belongsTo(ServiceProviders::class, 'service_providers_id');
-<<<<<<< HEAD
+        return $this->belongsTo(ServiceProvider::class, 'service_provider_id');
     }
+
+    public function serviceDetail()
+    {
+        return $this->belongsTo(ServiceDetails::class, 'service_detail_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
-=======
->>>>>>> 91006da72eb6664cb35fecf3231cb7b0c67ab617
     }
-    
 }
