@@ -20,7 +20,7 @@ function BookingPayment() {
     const serviceCharge = subtotal * 0.05; // 5% of the subtotal (adjust as needed)
     const totalCost = subtotal + serviceCharge;
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('Mpesa');
-    const [phoneNumber, setPhoneNumber] = useState('254748498010');
+    const [phoneNumber, setPhoneNumber] = useState('254111978124');
     const [loading, setLoading] = useState(false);
 
     // Function to handle radio button change

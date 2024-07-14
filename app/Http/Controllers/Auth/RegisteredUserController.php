@@ -80,7 +80,6 @@ class RegisteredUserController extends Controller
             'is_verified' => false,
             'is_admin' => false,
         ]);
-
         // Dispatch Registered event
         event(new Registered($user));
 

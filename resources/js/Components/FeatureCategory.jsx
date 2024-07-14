@@ -1,7 +1,7 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTools, faCar, faWrench } from '@fortawesome/free-solid-svg-icons';
-import Image3 from '../../img/services/service-01.jpg';
+import Image3 from '../../../public/Images/service-01.jpg';
 import { Link } from '@inertiajs/react';
 
 function FeatureCategory() {

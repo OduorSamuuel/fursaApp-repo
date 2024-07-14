@@ -8,6 +8,7 @@ import TextInput from '@/Components/TextInput';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
+
 const RegisterServiceProvider = () => {
   const { data, setData, post, processing, errors } = useForm({
     name: '',
@@ -22,6 +23,8 @@ const RegisterServiceProvider = () => {
     county_id: '',
     service_category: '', // Ensure this is initialized properly
     service_image: null,
+    latitude: null, // Added latitude
+    longitude: null, // Added longitude
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +33,7 @@ const RegisterServiceProvider = () => {
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [fetchingLocation, setFetchingLocation] = useState(false);
 
   useEffect(() => {
     axios.get(route('counties')).then(response => {
@@ -40,12 +44,57 @@ const RegisterServiceProvider = () => {
       setCategories(response.data);
     });
   }, []);
+
   useEffect(() => {
     if (selectedCategory) {
       setData('service_category', selectedCategory);
-      //console.log("selectedCategory ahahaha", selectedCategory);
+      setData('service_type', '');
+      axios.get(route('services.byCategory', selectedCategory)).then(response => {
+        setServices(response.data);
+      });
     }
   }, [selectedCategory]);
+
+  useEffect(() => {
+    let isMounted = true;
+  
+    const fetchLocation = () => {
+      if (navigator.geolocation) {
+        setFetchingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log('Position:', position);
+            if (isMounted) {
+              setData(prevData => ({
+                ...prevData,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              }));
+              setFetchingLocation(false);
+            }
+          },
+          (error) => {
+            console.error('Error getting location:', error);
+            if (isMounted) {
+              setFetchingLocation(false);
+            }
+          }
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+  
+    fetchLocation();
+  
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,13 +102,11 @@ const RegisterServiceProvider = () => {
     if (name === 'service_category') {
       setSelectedCategory(value);
       setData('service_category', value); 
-      console.log(value); // Update service_category in form data
-      setData('service_type', '');
       axios.get(route('services.byCategory', value)).then(response => {
         setServices(response.data);
       });
     } else {
-      setData(name, value); // Update other form fields
+      setData(name, value);
     }
   };
 
@@ -72,11 +119,12 @@ const RegisterServiceProvider = () => {
     const fullPhoneNumber = `${data.country_code}${data.contact_number}`;
     console.log(data);
     post('/register', {
+     
       data: {
         ...data,
         contact_number: fullPhoneNumber,
+
       },
-   
       onSuccess: () => {
         setData('success', 'Registration successful. Check your email for verification.');
         setTimeout(() => {
@@ -97,7 +145,7 @@ const RegisterServiceProvider = () => {
   return (
     <>
       <div className="flex items-center justify-center min-h-screen bg-gray-400">
-        <Backdrop open={processing} style={{ zIndex: 9999 }}>
+        <Backdrop open={processing || fetchingLocation} style={{ zIndex: 9999 }}>
           <CircularProgress color="inherit" />
         </Backdrop>
         <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
@@ -241,86 +289,74 @@ const RegisterServiceProvider = () => {
                     id="contact_number"
                     name="contact_number"
                     value={data.contact_number}
-                    className="mt-1 h-10 block w-full rounded-l-none"
+                    type="tel"
+                    pattern="[0-9]{9}"
+                    inputMode="numeric"
+                    className="mt-1 block w-full"
                     onChange={handleChange}
-                    maxLength={9}
-                    inputMode="numeric" // This attribute restricts input to numeric characters
-                    pattern="[0-9]*" // This attribute further enforces numeric input
                   />
                 </div>
                 <InputError message={errors.contact_number} className="mt-2" />
               </div>
               <div>
-                <InputLabel htmlFor="service_image" value="Service Image" />
-                <input
-                  type="file"
-                  id="service_image"
-                  name="service_image"
-                  className="mt-1 block w-full"
-                  onChange={handleFileChange}
-                />
-                <InputError message={errors.service_image} className="mt-2" />
-              </div>
-              <div className="relative">
                 <InputLabel htmlFor="password" value="Password" />
-                <div className="relative">
+                <div className="relative flex">
                   <TextInput
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={data.password}
-                    className="mt-1 block w-full pr-10"
                     autoComplete="new-password"
+                    className="mt-1 block w-full"
                     onChange={handleChange}
                   />
-                  <FontAwesomeIcon
-                    icon={showPassword ? faEyeSlash : faEye}
-                    className="absolute inset-y-0 right-3 top-3 cursor-pointer"
-                    onClick={toggleShowPassword}
-                  />
+                  <span className="absolute right-3 top-2 cursor-pointer" onClick={toggleShowPassword}>
+                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} className="text-gray-400" />
+                  </span>
                 </div>
                 <InputError message={errors.password} className="mt-2" />
               </div>
-              <div className="relative">
+              <div>
                 <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
-                <div className="relative">
+                <div className="relative flex">
                   <TextInput
                     id="password_confirmation"
                     type={showPasswordConfirmation ? 'text' : 'password'}
                     name="password_confirmation"
                     value={data.password_confirmation}
-                    className="mt-1 block w-full pr-10"
                     autoComplete="new-password"
+                    className="mt-1 block w-full"
                     onChange={handleChange}
                   />
-                  <FontAwesomeIcon
-                    icon={showPasswordConfirmation ? faEyeSlash : faEye}
-                    className="absolute inset-y-0 right-3 top-3 cursor-pointer"
-                    onClick={toggleShowPasswordConfirmation}
-                  />
+                  <span className="absolute right-3 top-2 cursor-pointer" onClick={toggleShowPasswordConfirmation}>
+                    <FontAwesomeIcon icon={showPasswordConfirmation ? faEye : faEyeSlash} className="text-gray-400" />
+                  </span>
                 </div>
                 <InputError message={errors.password_confirmation} className="mt-2" />
               </div>
+              <div>
+                <InputLabel htmlFor="service_image" value="Service Image" />
+                <input
+                  id="service_image"
+                  type="file"
+                  name="service_image"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="mt-1 block w-full"
+                />
+                <InputError message={errors.service_image} className="mt-2" />
+              </div>
             </div>
-            <div className="mt-6 flex">
-              <PrimaryButton type="submit" disabled={processing} className="w-full">
-                Register
+
+            <div className="mt-6 flex justify-between items-center">
+              <PrimaryButton type="submit" className="w-full">
+                {processing ? 'Submitting...' : 'Create Account'}
               </PrimaryButton>
+              <Link href="/login" className="text-sm text-blue-500 hover:text-blue-700">
+                Already have an account? Login
+              </Link>
             </div>
           </form>
-
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-700">Registration Rules</h3>
-            <ul className="list-disc list-inside text-gray-600 mt-2">
-              <li>All fields must be filled.</li>
-              <li>Password must be a minimum of 8 characters.</li>
-              <li>Passwords must match.</li>
-            </ul>
-          </div>
-
-          <p className="text-sm text-gray-500 mt-4 text-center">
-            Or <Link href={route('login')} className="underline cursor-pointer">Sign in to your account</Link>
-          </p>
         </div>
       </div>
     </>

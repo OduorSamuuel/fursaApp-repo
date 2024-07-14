@@ -10,8 +10,8 @@ import Slider from 'react-slick';
 import '../../css/feather.css';
 import 'aos/dist/aos.css';
 import '../../css/style.css';
-import '../../css/bootstrap-datetimepicker.min.css';
-import Image5 from '../../img/—Pngtree—cleaner work scene cartoon hand_3808068.png';
+
+import Image5 from '../../../public/Images/—Pngtree—cleaner work scene cartoon hand_3808068.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapPin, faSearch, faArrowRight, faArrowLeft, faStar } from '@fortawesome/free-solid-svg-icons';
 import AOS from 'aos';
@@ -104,79 +104,39 @@ export default function Home({ auth, laravelVersion, phpVersion }) {
       <Head title="Home" />
 
       <div className="bg-gray-100 ">
-      <section className="hero-section pr-4 pl-4">
-            <div className="container mx-auto">
-                <div className="">
-                    <div className="flex flex-wrap items-center w-full">
-                        <div className="lg:w-7/12 md:w-10/12 mx-auto">
-                            <div className="section-search aos" data-aos="fade-up">
-                                <h1 className="text-4xl font-bold">Find home and professional services near you</h1>
-                                <p className="mt-2 text-lg">Search hundreds of verified ads</p>
-                                <div className="search-box mt-4">
-                                    <form action="">
-                                        <div className="flex flex-wrap items-center space-x-4">
-                                            <div className="search-input line flex flex-grow items-center space-x-2">
-                                                <FontAwesomeIcon icon={faMapPin} />
-                                                <div className="form-group mb-0">
-                                                    <label className="block text-sm font-medium">Your Location</label>
-                                                    <input type="text" className="form-control block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Kenya"/>
-                                                </div>
-                                            </div>
-                                            <div className="search-input flex flex-grow items-center space-x-2">
-                                                <FontAwesomeIcon icon={faSearch} />
-                                                <div className="form-group mb-0">
-                                                    <label className="block text-sm font-medium">What are you looking for?</label>
-                                                    <input type="text" className="form-control block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Cleaning services"/>
-                                                </div>
-                                            </div>
-                                            <div className="search-btn">
-                                                <button className="btn bg-yellow-700 text-white px-4 py-2 rounded-md shadow-sm" type="submit"><FontAwesomeIcon icon={faSearch} className="mr-2" />Search</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="lg:w-5/12">
-                            <div className="banner-imgs">
-                              
-                                    <img className="w-full max-h-96" alt="banner" src={Image5}/>
-                              
-                                
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row items-center">
+              <div className="lg:w-1/2 mb-10 lg:mb-0" data-aos="fade-right">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-6">Find home and professional services near you</h1>
+                <p className="text-xl text-gray-600 mb-8">Search hundreds of verified ads</p>
+           
+              </div>
+              <div className="lg:w-1/2" data-aos="fade-left">
+                <img src={Image5} alt="banner" className="w-full h-auto max-h-96 object-contain" />
+              </div>
             </div>
+          </div>
         </section>
-        <section className="feature-section " data-aos="fade-up">
-       <div className="container mx-auto p-4">
-           <div className="section-heading">
-               <div className="flex flex-wrap items-center">
-                   <div className="w-full md:w-1/2 aos" data-aos="fade-up">
-                       <h2 className="text-2xl font-bold">Featured Categories</h2>
-                       <p className="mt-2">What do you need to find?</p>
-                   </div>
-                   <div className="w-full md:w-1/2 text-right aos" data-aos="fade-up">
-                       <a href="categories.html" className="btn bg-yellow-700 text-white px-4 py-2 rounded-md inline-flex items-center">View All<FontAwesomeIcon icon={faArrowRight} className="ml-2" /></a>
-                   </div>
-               </div>
-           </div>
-           <div className="flex flex-wrap -mx-2">
-             
-              
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-<FeatureCategory/> 
-           </div>
-       </div>
-   </section>
-    
+        <section className="feature-section" data-aos="fade-up">
+      <div className="container mx-auto p-4">
+        <div className="mb-8">
+          <div className="flex flex-wrap items-center">
+            <div className="w-full md:w-1/2">
+              <h2 className="text-2xl font-bold">Featured Categories</h2>
+              <p className="mt-2">What do you need to find?</p>
+            </div>
+            <div className="w-full md:w-1/2 text-right">
+              <Link href="/services" className="bg-yellow-700 text-white px-4 py-2 rounded-md inline-flex items-center hover:bg-yellow-800 transition duration-300">
+                View All
+                <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+              </Link>
+            </div>
+          </div>
+        </div>
+        <FeatureCategory />
+      </div>
+    </section>
 
         {/* Search Bar */}
     
@@ -213,103 +173,37 @@ export default function Home({ auth, laravelVersion, phpVersion }) {
        
        
       <section className="" data-aos="fade-up">
-    <div className="container mx-auto">
-      <div className="section-heading">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <div className="aos" data-aos="fade-up">
-            <h2 className="text-2xl">Top Providers</h2>
-            <p>Meet Our Experts</p>
-          </div>
-          <div className="text-right aos" data-aos="fade-up">
-            <a href="providers.html" className="btn btn-primary btn-view">
-              View All <FontAwesomeIcon icon={faArrowRight} />
-            </a>
-          </div>
+    <div className="container mx-auto"> <div className="section-heading" data-aos="fade-up">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Top Providers</h2>
+          <p className="mt-2">Meet Our Experts</p>
+        </div>
+        <div className="text-right">
+          <a href="providers.html" className="bg-blue-500 text-white px-4 py-2 rounded-md inline-flex items-center hover:bg-blue-600 transition duration-300">
+            View All <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+          </a>
         </div>
       </div>
+    </div>
 
 
-      <Slider {...settings1}>
-              {providersArray.map((provider, index) => (
-                <div key={index} className="p-2">
-                  <ServiceProviderCard provider={provider} />
-                </div>
-              ))}
-            </Slider>
+
+  <Slider {...settings1}>
+    {providersArray.map((provider, index) => (
+      <div key={index} className="p-2">
+        <ServiceProviderCard provider={provider} />
+      </div>
+    ))}
+  </Slider>
+
+
+
  
     </div>
   </section>
 
-          <section className="client-section py-8 bg-white" data-aos="fade-up">
-        <div className="container mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">What our clients say</h2>
-            <p className="text-gray-600">Lorem ipsum dolor sit amet, consectetur elit</p>
-          </div>
-          <Slider {...settings}>
-            <div className='p-3'>
-            <div className="client-widget p-4  " data-aos="fade-up">
-              <div className="client-img mb-4">
-                <a href="#">
-                  <img className="w-24 h-24 rounded-full mx-auto" alt="Image" src={RatingImage} />
-                </a>
-              </div>
-              <div className="client-content text-center">
-                <div className="rating mb-2">
-                  {[...Array(5)].map((_, index) => (
-                    <FontAwesomeIcon key={index} icon={faStar} className="text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi</p>
-                <h5 className="font-bold">Sophie Moore</h5>
-                <h6 className="text-gray-600">Director</h6>
-              </div>
-            </div>
-            </div>
-            <div className=' p-3'>
-           <div className="client-widget p-4" data-aos="fade-up">
-              <div className="client-img mb-4">
-                <a href="#">
-                  <img className="w-24 h-24 rounded-full mx-auto" alt="Image" src={RatingImage} />
-                </a>
-              </div>
-              <div className="client-content text-center">
-                <div className="rating mb-2">
-                  {[...Array(5)].map((_, index) => (
-                    <FontAwesomeIcon key={index} icon={faStar} className="text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi</p>
-                <h5 className="font-bold">Mike Hussy</h5>
-                <h6 className="text-gray-600">Lead</h6>
-              </div>
-            </div>
-           </div>
-
-           
-
-           <div className=' p-3'>
-          <div className="client-widget p-4" data-aos="fade-up">
-              <div className="client-img mb-4">
-                <a href="#">
-                  <img className="w-24 h-24 rounded-full mx-auto" alt="Image" src={RatingImage} />
-                </a>
-              </div>
-              <div className="client-content text-center">
-                <div className="rating mb-2">
-                  {[...Array(5)].map((_, index) => (
-                    <FontAwesomeIcon key={index} icon={faStar} className="text-yellow-500" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi</p>
-                <h5 className="font-bold">John Doe</h5>
-                <h6 className="text-gray-600">CEO</h6>
-              </div>
-            </div>
-          </div>
-          </Slider>
-        </div>
-      </section>
+         
 
 
         

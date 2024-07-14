@@ -101,7 +101,7 @@ Route::get('/verify-my-email', function () {
 Route::get('auth/google',[GoogleAuthController::class, 'redirect'])->name('google-auth');
 Route::get('auth/google/call-back',[GoogleAuthController::class, 'callback']);
 Route::get('/verify', function () {
-    return view('verification');
+    return view('verification')->name('verify');
 
 })->name('success');
 Route::get('/verification/{token}', [VerificationController::class, 'verify'])->name('verification');

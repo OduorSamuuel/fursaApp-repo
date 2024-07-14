@@ -85,7 +85,7 @@
             <img src="{{ $message->embed(public_path('Images/logo-color.png')) }}" alt="logo">
            </div>
         </div>
-        <div class="body">
+        <div class="body"> 
             <div class="content">
                 <p>Hello,</p>
                 <p>Thank you for choosing fursaApp. Your registration is almost complete. Click the button below to finish the process:</p>
