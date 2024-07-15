@@ -39,6 +39,17 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'user.last.seen.at'])->group(function () {
+    Route::put('/service/cancel/{id}', [BookingController::class, 'cancelService'])->name('cancel.service');
+    Route::get('/booking-done',[MpesaController::class, 'processBooking'])->name('booking.store1');
+    Route::get('/rating/{serviceDetailId}', [RatingController::class, 'index'])->name('ratings.index');
+    Route::post('/rate-provider', [RatingController::class, 'store'])->name('ratings.store');
+    Route::post('/update-payment/{id}', [MpesaController::class, 'updatePayment'])->name('update.payment');
+    
+    Route::post('/perform-stk-push', [MpesaController::class, 'performStkPush'])->name('perform-stk-push');
+    //Route::get('/mpesa/stk/callback', [MpesaController::class, 'handleStkCallback'])->name('mpesa.stk.callback');
+    Route::post('/booked', [BookingController::class, 'createBooking'])->name('booking.create');
+
+    Route::get('/querystk-push', [MpesaController::class, 'queryStkPush'])->name('query.stk.push');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -46,6 +57,13 @@ Route::middleware(['auth', 'user.last.seen.at'])->group(function () {
    Route::get('/accounts/messages', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
     Route::get('/accounts/messages/{user:uuid}', [\App\Http\Controllers\ChatController::class, 'show'])->name('chat.show');
     Route::post('/accounts/messages/{user:uuid}', [\App\Http\Controllers\ChatController::class, 'chat'])->name('chat.store');
+
+   Route::get('/admin/chats', [\App\Http\Controllers\ChatController::class, 'index'])->name('admin.chats');
+    Route::get('/admin/chats/{user:uuid}', [\App\Http\Controllers\ChatController::class, 'show'])->name('chat.show');
+    Route::post('/admin/chats/{user:uuid}', [\App\Http\Controllers\ChatController::class, 'chat'])->name('chat.store');
+   Route::get('/service/chats', [\App\Http\Controllers\ChatController::class, 'index'])->name('service.chats');
+    Route::get('/service/chats{user:uuid}', [\App\Http\Controllers\ChatController::class, 'show'])->name('chat.show');
+    Route::post('/service/chats{user:uuid}', [\App\Http\Controllers\ChatController::class, 'chat'])->name('chat.store');
 
     Route::delete('/accounts/messages/{chat}', [\App\Http\Controllers\ChatController::class, 'destroy'])->name('chat.destroy');
 });
@@ -76,6 +94,24 @@ Route::middleware(['role:serviceprovider_admin', 'admin.otp', 'ensure.screen.unl
     Route::get('/service/dashboard', function () {
         return Inertia::render('Admin/ServiceProvider');
     })->name('service_admin');
+    Route::post('/update-status/{id}', [ServiceController::class, 'updateStatus'])->name('service-request.update-status');
+    Route::get('/userdetails/{id}',[ServiceController::class, 'showUserDetails'])->name('userdetails.show');
+    Route::post('/initiate-payment/{id}', [MpesaController::class, 'initiatePayment'])->name('initiate.payment');
+    Route::get('/admin-querystk-push', [MpesaController::class, 'AdminQueryStkPush'])->name('admin.query.stk.push');
+    
+Route::get('/service/dashboard', [ServiceController::class, 'dashboard'])->name('service.dashboard');
+Route::get('/service/services', [ServiceController::class, 'services'])->name('service.services');
+
+Route::get('/service/clients', [ServiceController::class, 'clients'])->name('admin.clients');
+Route::get('/service/settings', [ServiceController::class, 'settings'])->name('service.settings');
+Route::get('/counties', [ServiceProviderController::class, 'getCounties'])->name('counties');
+Route::get('/categories', [ServiceProviderController::class, 'getCategories'])->name('categories');
+Route::get('/services/{category}', [ServiceProviderController::class, 'getServicesByCategory'])->name('services.byCategory');
+Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
+Route::post('admin/services/{id}/updateadditional', [ServiceController::class, 'updateAdditional'])->name('admin.services.updateadditional');
+
+
+
 });
 Route::get('/admin/services', [ServiceController::class, 'services'])->name('admin.services');
 Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
@@ -85,6 +121,18 @@ Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])
     Route::post('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
     Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
     Route::post('/users/{id}/assign-role', [AdminController::class, 'assignRole'])->name('users.assignRole');
+    Route::post('/payprovider', [AdminController::class, 'payProvider'])->name('payments.payProvider');
+    Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::delete('/admin/super/service-providers/{id}', [AdminController::class, 'destroy'])
+    ->name('admin.super.service-providers.destroy');
+    Route::put('/admin/superc-providers/{id}', [AdminController::class, 'update'])
+    ->name('admin.super.service-providers.update');
+    Route::get('/admin/customers',[AdminController::class, 'providers'])->name('providers.index');
+    Route::get('/admin/payments',[AdminController::class, 'payments'])->name('admin.payments');
+    Route::get('/admin/settings',[AdminController::class, 'settings'])->name('admin.settings');
+    Route::get('/admin/reports',[AdminController::class, 'reports'])->name('admin.reports');
+
+
    
    ;
 });
@@ -136,18 +184,7 @@ Route::post('/accounts/update', [UserController::class, 'update'])->name('accoun
 Route::get('/account-details', [UserController::class, 'show'])->name('account.details');
 Route::get('/admin/account-details', [UserController::class, 'profiledetails'])->name('account.details');
 Route::get('/chat/index', [ChatController::class, 'index'])->name('chat.index');
-Route::get('/users', [UserController::class, 'index']);
-Route::get('/service/dashboard', [ServiceController::class, 'dashboard'])->name('service.dashboard');
-Route::get('/service/services', [ServiceController::class, 'services'])->name('service.services');
-
-Route::get('/service/clients', [ServiceController::class, 'clients'])->name('admin.clients');
-Route::get('/service/settings', [ServiceController::class, 'settings'])->name('service.settings');
-Route::get('/counties', [ServiceProviderController::class, 'getCounties'])->name('counties');
-Route::get('/categories', [ServiceProviderController::class, 'getCategories'])->name('categories');
-Route::get('/services/{category}', [ServiceProviderController::class, 'getServicesByCategory'])->name('services.byCategory');
-Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
-Route::post('admin/services/{id}/updateadditional', [ServiceController::class, 'updateAdditional'])->name('admin.services.updateadditional');
-Route::get('/description/{id}', [ServiceController::class, 'getDescription'])->name('description');
+Route::get('/users', [UserController::class, 'index']);Route::get('/description/{id}', [ServiceController::class, 'getDescription'])->name('description');
 
 
     
@@ -157,10 +194,7 @@ Route::post('/appointments', [AppointmentController::class, 'store'])->name('app
     Route::get('/accounts/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
 
 
-    Route::post('/perform-stk-push', [MpesaController::class, 'performStkPush'])->name('perform-stk-push');
-    //Route::get('/mpesa/stk/callback', [MpesaController::class, 'handleStkCallback'])->name('mpesa.stk.callback');
 
-    Route::get('/querystk-push', [MpesaController::class, 'queryStkPush'])->name('query.stk.push');
 
 Route::get('/test',function(){
     return Inertia::render('Test');
@@ -171,9 +205,10 @@ Route::post('/booking-summary', [BookingController::class, 'summary'])->name('bo
 Route::get('/summary', [BookingController::class, 'viewSummary'])->name('booking.view');
 Route::post('/payment', [BookingController::class, 'payment'])->name('booking.payment');
 Route::get('/payment-module', [MpesaController::class, 'paymentProcess'])->name('payment.process');
-Route::post('/booked', [BookingController::class, 'createBooking'])->name('booking.create');
-Route::get('/rating/{serviceDetailId}', [RatingController::class, 'index'])->name('ratings.index');
-Route::post('/rate-provider', [RatingController::class, 'store'])->name('ratings.store');
+Route::get('/admin/payment-module', [MpesaController::class, 'AdminPaymentProcess'])->name('admin.payment.process');
+
+
+
 
 Route::get('/booking-payment',function(){
     Return Inertia::render('BookingPayment');
@@ -188,26 +223,21 @@ Route::get('/accounts/transactions',function(){
     Return Inertia::render('Accounts/Transactions');
 });
 
-Route::get('/admin/reports',function(){
-    Return Inertia::render('Admin/Super/Reports');
-});
-Route::get('/admin/chats',function(){
-    Return Inertia::render('Admin/Super/Chat');
-});
-Route::get('/admin/payments',function(){
-    Return Inertia::render('Admin/Super/Payments');
-});
-Route::get('/admin/settings',function(){
-    Return Inertia::render('Admin/Super/Settings');
-});
-Route::get('/admin/customers',[AdminController::class, 'providers'])->name('providers.index');
-Route::get('/booking-done',[MpesaController::class, 'processBooking'])->name('booking.store1');
-Route::put('/admin/superc-providers/{id}', [AdminController::class, 'update'])
-    ->name('admin.super.service-providers.update');
+
+//Route::get('/admin/chats',[AdminController::class, 'chats'])->name('admin.chats');
+ 
+
+
+
 
 // Delete a service provider
-Route::delete('/admin/super/service-providers/{id}', [AdminController::class, 'destroy'])
-    ->name('admin.super.service-providers.destroy');
+
+
+
+    Route::get('/welcome',function(){
+        return view('welcome');
+    });
+
 
 require __DIR__.'/auth.php';
 
