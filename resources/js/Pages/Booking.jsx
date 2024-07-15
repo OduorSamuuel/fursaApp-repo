@@ -65,6 +65,17 @@ function Booking() {
     });
   };
 
+  const isPastDate = (date) => {
+    return moment(date).isBefore(moment(), 'day');
+  };
+
+  const isPastTimeSlot = (slot) => {
+    if (selectedDate === moment().format('YYYY-MM-DD')) {
+      return moment(slot, 'hh:mm A').isBefore(moment());
+    }
+    return false;
+  };
+
   return (
     <div className="main-wrapper">
       <div className="content">
@@ -163,6 +174,7 @@ function Booking() {
                       className="form-control"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
+                      min={moment().format('YYYY-MM-DD')} // Disable past dates
                     />
                   </div>
                 </div>
@@ -184,6 +196,7 @@ function Booking() {
                             name="appointment"
                             value={slot}
                             onChange={() => setSelectedTime(slot)}
+                            disabled={isPastTimeSlot(slot)} // Disable past time slots
                           />
                           <span className="visit-rsn">{slot}</span>
                         </label>

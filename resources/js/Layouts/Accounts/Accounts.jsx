@@ -45,6 +45,17 @@ function Accounts({ children, selectedLink }) {
                 <span>Messages</span>
               </Link>
             </li>
+            <li>
+              <Link
+                href="/accounts/transactions"
+                className={`w-full flex items-center text-left py-2 px-4 rounded-md transition-colors duration-300 ${
+                  selectedLink === 'transactions' ? 'bg-gray-500 text-white font-semibold focus:bg-gray-600 hover:bg-gray-600' : 'focus:bg-gray-200 hover:bg-gray-200'
+                }`}
+              >
+                <FontAwesomeIcon icon={faEnvelope} className="mr-3" />
+                <span>Transactions</span>
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

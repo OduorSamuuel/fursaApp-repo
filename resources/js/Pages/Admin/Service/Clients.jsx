@@ -1,35 +1,44 @@
-// Clients.jsx
-
 import React, { useState } from 'react';
+import { Inertia } from '@inertiajs/inertia';
 import SidebarLayout from '@/Layouts/Admin/SidebarLayout';
 import TopBar from '@/Layouts/Admin/TopBar';
-import { usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import PaymentModal from '../../PaymentModal'; // Adjust the path as per your file structure
+import Sidebar from '@/Layouts/Admin/Sidebar';
 
 const Clients = () => {
   const { appointments } = usePage().props;
+  console.log(appointments);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
-  const handleInitiatePayment = (appointment) => {
-    setSelectedAppointment(appointment);
-  };
 
   const handleCloseModal = () => {
     setSelectedAppointment(null);
   };
 
+  const handlePayment = (appointmentId) => {
+    // Update payment status in the backend
+    Inertia.post(`/appointments/${appointmentId}/pay`, {}, {
+      onSuccess: () => {
+        alert('Payment successful and invoice marked as paid.');
+        handleCloseModal();
+      },
+      onError: (errors) => {
+        alert('Payment failed.');
+      },
+    });
+  };
+
   return (
     <TopBar>
-      <SidebarLayout>
+      <Sidebar>
         <div className="w-full overflow-hidden rounded-lg shadow-xs">
           <div className="w-full overflow-x-auto">
             <table className="w-full whitespace-no-wrap">
               <thead>
                 <tr className="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
                   <th className="px-4 py-3">Client Name</th>
-                  <th className="px-4 py-3">Appointment Time</th>
+                  <th className="px-4 py-3">Appointment date</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Appointment Date</th>
                   <th className="px-4 py-3">Services</th>
                   <th className="px-4 py-3">Actions</th>
                 </tr>
@@ -38,7 +47,7 @@ const Clients = () => {
                 {appointments.map((appointment, index) => (
                   <tr key={index} className="text-gray-700 dark:text-gray-400">
                     <td className="px-4 py-3">{appointment.user.name}</td>
-                    <td className="px-4 py-3">{appointment.appointment_datetime}</td>
+                    <td className="px-4 py-3">{appointment.booking_date}</td>
                     <td className="px-4 py-3 text-xs">
                       <span
                         className={`px-2 py-1 font-semibold leading-tight ${
@@ -52,17 +61,14 @@ const Clients = () => {
                         {appointment.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">{appointment.appointment_date}</td>
-                    <td className="px-4 py-3">{appointment.service}</td>
+                    <td className="px-4 py-3">{appointment.service_type}</td>
                     <td className="px-4 py-3">
-                      {appointment.status === 'Pending' && (
-                        <button
-                          onClick={() => handleInitiatePayment(appointment)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
-                        >
-                          Initiate Payment
-                        </button>
-                      )}
+                      <Link
+                        href={`/userdetails/${appointment.id}`}
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-75"
+                      >
+                        View User
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -70,12 +76,13 @@ const Clients = () => {
             </table>
           </div>
         </div>
-      </SidebarLayout>
+      </Sidebar>
 
       {/* Payment Modal */}
       <PaymentModal
         isOpen={selectedAppointment !== null}
         onClose={handleCloseModal}
+        onPayment={() => handlePayment(selectedAppointment.id)}
         clientName={selectedAppointment?.user.name}
         contactNumber={selectedAppointment?.user.contact_number}
         servicePrice={selectedAppointment?.servicePrice} // Replace with actual service price

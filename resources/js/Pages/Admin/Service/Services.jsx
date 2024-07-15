@@ -7,9 +7,11 @@ import { faEdit, faSave } from '@fortawesome/free-solid-svg-icons';
 import SidebarLayout from '@/Layouts/Admin/SidebarLayout';
 import TopBar from '@/Layouts/Admin/TopBar';
 import Card from '../../../Components/Card';
+import Sidebar from '@/Layouts/Admin/Sidebar';
 
 function Services() {
     const { provider, serviceDetails, countyName,pricingTiers,counties, availability: initialAvailability } = usePage().props;
+   
     console.log(counties);
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const [isEditingAdditional, setIsEditingAdditional] = useState(false);
@@ -185,8 +187,8 @@ function Services() {
     };
 
     return (
-        <TopBar>
-    
+        <TopBar >
+    <Sidebar>
             <div className="max-w-4xl mx-auto p-8 bg-white shadow-md rounded-lg">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Your Service</h2>
@@ -470,8 +472,9 @@ function Services() {
                               
             </div>
 
-      
+            </Sidebar>
     </TopBar>
+    
     );
 }
 
