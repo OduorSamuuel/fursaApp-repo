@@ -8,7 +8,7 @@ import "../../css/style.css";
 import "aos/dist/aos.css";
 import "../../css/bootstrap.min.css";
 import "../../css/bootstrap-datetimepicker.min.css";
-import Image from "../../img/booking-done.png";
+import Image from "../../../public/Images/booking-done.png";
 import { Link } from "@inertiajs/react";
 
 function BookingSuccess() {

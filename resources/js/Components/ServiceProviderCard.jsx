@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { Link } from '@inertiajs/inertia-react'; // Import Link from @inertiajs/inertia-react
 
+
 function ServiceProviderCard({ provider }) {
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +15,7 @@ function ServiceProviderCard({ provider }) {
   }, [provider.image]);
 
   return (
-    <div className="col-lg-3 col-sm-6">
+    <div className="col-lg-3 col-sm-6 w-60">
       <div className="providerset">
         <div className="providerset-img">
           <Link href={`/provider-details/${provider.id}`}>

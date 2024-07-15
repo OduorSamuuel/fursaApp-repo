@@ -22,7 +22,7 @@ import {
   faSignOutAlt,
 } from '@fortawesome/free-solid-svg-icons';
 
-function Header() {
+function Header({auth}) {
   const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
   const [isNotificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [isTimesheetMenuOpen, setTimesheetMenuOpen] = useState(false);
@@ -148,7 +148,7 @@ function Header() {
                 >
                   <img
                     src="assets/vendors/img/flags/4x3/us.svg"
-                    alt=""
+                    alt="image"
                     className="img-fluid wd-20"
                   />
                 </a>

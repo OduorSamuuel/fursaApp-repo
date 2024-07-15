@@ -86,7 +86,7 @@ const Login = ({ status, canResetPassword }) => {
             </PrimaryButton>
           </form>
           <p className="text-sm text-gray-500 mt-4 text-center">
-            Or <Link href="/choice" className="underline cursor-pointer">create a new account</Link>
+            Or <Link href="/register" className="underline cursor-pointer">create a new account</Link>
           </p>
         </div>
       </div>

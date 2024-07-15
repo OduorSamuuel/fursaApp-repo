@@ -44,6 +44,7 @@ Route::middleware(['auth', 'user.last.seen.at'])->group(function () {
     Route::get('/rating/{serviceDetailId}', [RatingController::class, 'index'])->name('ratings.index');
     Route::post('/rate-provider', [RatingController::class, 'store'])->name('ratings.store');
     Route::post('/update-payment/{id}', [MpesaController::class, 'updatePayment'])->name('update.payment');
+    Route::put('/rate-provider/{id}', [RatingController::class, 'update'])->name('ratings.update');
     
     Route::post('/perform-stk-push', [MpesaController::class, 'performStkPush'])->name('perform-stk-push');
     //Route::get('/mpesa/stk/callback', [MpesaController::class, 'handleStkCallback'])->name('mpesa.stk.callback');
@@ -98,6 +99,7 @@ Route::middleware(['role:serviceprovider_admin', 'admin.otp', 'ensure.screen.unl
     Route::get('/userdetails/{id}',[ServiceController::class, 'showUserDetails'])->name('userdetails.show');
     Route::post('/initiate-payment/{id}', [MpesaController::class, 'initiatePayment'])->name('initiate.payment');
     Route::get('/admin-querystk-push', [MpesaController::class, 'AdminQueryStkPush'])->name('admin.query.stk.push');
+    Route::get('/admin/user/{id}', [AdminController::class, 'show'])->name('admin.chat.show');
     
 Route::get('/service/dashboard', [ServiceController::class, 'dashboard'])->name('service.dashboard');
 Route::get('/service/services', [ServiceController::class, 'services'])->name('service.services');
@@ -131,6 +133,8 @@ Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])
     Route::get('/admin/payments',[AdminController::class, 'payments'])->name('admin.payments');
     Route::get('/admin/settings',[AdminController::class, 'settings'])->name('admin.settings');
     Route::get('/admin/reports',[AdminController::class, 'reports'])->name('admin.reports');
+    Route::get('/admin/users/{id}',[AdminController::class, 'manage'])->name('admin.chats');
+    Route::post('/users/{id}/verify', [AdminController::class, 'verifyUser'])->name('users.verify');
 
 
    
@@ -149,7 +153,7 @@ Route::get('/verify-my-email', function () {
 Route::get('auth/google',[GoogleAuthController::class, 'redirect'])->name('google-auth');
 Route::get('auth/google/call-back',[GoogleAuthController::class, 'callback']);
 Route::get('/verify', function () {
-    return view('verification')->name('verify');
+    return view('verification');
 
 })->name('success');
 Route::get('/verification/{token}', [VerificationController::class, 'verify'])->name('verification');
