@@ -82,7 +82,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-            <img src="{{ $message->embed(public_path('Images/logo-color.png')) }}" alt="logo">
+            <img src="{{ $message->ebmbed(public_path('Images/logo-color.png')) }}" alt="logo">
            </div>
         </div>
         <div class="body"> 
