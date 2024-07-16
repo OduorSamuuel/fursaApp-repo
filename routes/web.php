@@ -135,7 +135,7 @@ Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])
     Route::get('/admin/reports',[AdminController::class, 'reports'])->name('admin.reports');
     Route::get('/admin/users/{id}',[AdminController::class, 'manage'])->name('admin.chats');
     Route::post('/users/{id}/verify', [AdminController::class, 'verifyUser'])->name('users.verify');
-    Route::post('/admin/approve-user', [AdminController::class, 'updateApprovalStatus'])->name('admin.updateApprovalStatus');
+    Route::post('/admin/approve-user/{id}', [AdminController::class, 'updateApprovalStatus'])->name('admin.updateApprovalStatus');
 
 
    
