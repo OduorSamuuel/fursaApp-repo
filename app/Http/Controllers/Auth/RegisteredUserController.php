@@ -109,7 +109,7 @@ public function storeServiceProvider(Request $request)
         'contact_number' => 'required|string',
         'address' => 'required|string|max:255',
         'county_id' => 'nullable|exists:counties,id',
-        'service_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+   
         'service_category' => 'required|string|max:255', // Validate service_category
         'latitude' => 'required|numeric',
         'longitude' => 'required|numeric',

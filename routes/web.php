@@ -106,9 +106,8 @@ Route::get('/service/services', [ServiceController::class, 'services'])->name('s
 
 Route::get('/service/clients', [ServiceController::class, 'clients'])->name('admin.clients');
 Route::get('/service/settings', [ServiceController::class, 'settings'])->name('service.settings');
-Route::get('/counties', [ServiceProviderController::class, 'getCounties'])->name('counties');
-Route::get('/categories', [ServiceProviderController::class, 'getCategories'])->name('categories');
-Route::get('/services/{category}', [ServiceProviderController::class, 'getServicesByCategory'])->name('services.byCategory');
+
+
 Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 Route::post('admin/services/{id}/updateadditional', [ServiceController::class, 'updateAdditional'])->name('admin.services.updateadditional');
 
@@ -232,7 +231,7 @@ Route::get('/accounts/transactions',function(){
  
 
 
-
+Route::get('/services/{category}', [ServiceProviderController::class, 'getServicesByCategory'])->name('services.byCategory');
 
 // Delete a service provider
 
@@ -242,6 +241,7 @@ Route::get('/accounts/transactions',function(){
         return view('welcome');
     });
 
-
+    Route::get('/counties', [ServiceProviderController::class, 'getCounties'])->name('counties');
+    Route::get('/categories', [ServiceProviderController::class, 'getCategories'])->name('categories');
 require __DIR__.'/auth.php';
 

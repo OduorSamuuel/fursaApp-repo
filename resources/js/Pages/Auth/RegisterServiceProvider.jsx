@@ -22,7 +22,7 @@ const RegisterServiceProvider = () => {
     country_code: '254',
     county_id: '',
     service_category: '', // Ensure this is initialized properly
-    service_image: null,
+   
     latitude: null, // Added latitude
     longitude: null, // Added longitude
   });
@@ -110,9 +110,7 @@ const RegisterServiceProvider = () => {
     }
   };
 
-  const handleFileChange = (e) => {
-    setData('service_image', e.target.files[0]);
-  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -334,18 +332,7 @@ const RegisterServiceProvider = () => {
                 </div>
                 <InputError message={errors.password_confirmation} className="mt-2" />
               </div>
-              <div>
-                <InputLabel htmlFor="service_image" value="Service Image" />
-                <input
-                  id="service_image"
-                  type="file"
-                  name="service_image"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                />
-                <InputError message={errors.service_image} className="mt-2" />
-              </div>
+             
             </div>
 
             <div className="mt-6 flex justify-between items-center">
