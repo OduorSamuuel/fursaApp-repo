@@ -182,7 +182,7 @@ public function storeServiceProvider(Request $request)
 
         try {
             Mail::to($request->email)->send(new UserVerification($tokenLink));
-            dd($tokenLink);
+          
         } catch (\Exception $e) {
             dd($e);
             DB::rollBack();
