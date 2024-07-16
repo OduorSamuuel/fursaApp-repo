@@ -118,6 +118,7 @@ Route::get('/admin/services', [ServiceController::class, 'services'])->name('adm
 Route::put('/admin/services/{id}', [ServiceController::class, 'update'])->name('admin.services.update');
 // Routes for general admin
 Route::middleware(['role:general_admin', 'admin.otp', 'ensure.screen.unlocked'])->group(function () {
+    Route::get('/admin/edit-customer/{id}', [AdminController::class, 'editCustomer'])->name('admin.edit.customer');
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::post('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
     Route::post('/users/{id}/approve', [AdminController::class, 'approveUser'])->name('users.approve');
