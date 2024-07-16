@@ -109,8 +109,7 @@ public function storeServiceProvider(Request $request)
         'contact_number' => 'required|string',
         'address' => 'required|string|max:255',
         'county_id' => 'nullable|exists:counties,id',
-   
-        'service_category' => 'required|string|max:255', // Validate service_category
+        'service_category' => 'required|string|max:255',
         'latitude' => 'required|numeric',
         'longitude' => 'required|numeric',
     ]);
@@ -122,9 +121,10 @@ public function storeServiceProvider(Request $request)
     $username = explode('@', $request->email)[0];
     $verificationToken = Str::random(60);
     $fullPhoneNumber = '254' . $request->contact_number;
-    DB::beginTransaction();
 
     try {
+        DB::beginTransaction();
+        // Create User
         $user = User::create([
             'name' => $request->name,
             'username' => $username,
@@ -138,10 +138,14 @@ public function storeServiceProvider(Request $request)
             'is_verified' => false,
             'is_admin' => true,
         ]);
+        DB::commit();
+     
 
         // Dispatch Registered event
         event(new Registered($user));
 
+        DB::beginTransaction();
+        // Create ServiceProvider
         $serviceProvider = ServiceProvider::create([
             'user_id' => $user->id,
             'company_name' => $request->company_name,
@@ -153,37 +157,45 @@ public function storeServiceProvider(Request $request)
             'is_approved' => false,
             'county_id' => $request->county_id,
         ]);
+        DB::commit();
+       
 
-        // Create ServiceDetails associated with the service provider
+        DB::beginTransaction();
+        // Create ServiceDetails
         $serviceDetails = ServiceDetails::create([
             'service_provider_id' => $serviceProvider->id,
-            'category' => $request->service_category, // Capture service_category here
-            'service_description' => 'Add your service description here', // Example, adjust as needed
+            'category' => $request->service_category,
+            'service_description' => 'Add your service description here',
         ]);
+        DB::commit();
 
+        DB::beginTransaction();
+        // Create Admin
         Admin::create([
             'user_id' => $user->id,
             'title' => 'serviceprovider_admin',
         ]);
+        DB::commit();
 
         $tokenLink = route('verification', ['token' => $verificationToken]);
+       
 
         try {
             Mail::to($request->email)->send(new UserVerification($tokenLink));
+            dd($tokenLink);
         } catch (\Exception $e) {
+            dd($e);
             DB::rollBack();
             return back()->with('error', 'Registration successful, but the verification email could not be sent.');
         }
 
-        DB::commit();
         return redirect()->back()->with('success', 'Registration successful. Please check your email for verification.');
-
     } catch (\Exception $e) {
         DB::rollBack();
-        
-        return back()->with('error', 'Something went wrong during user creation. Please try again.');
+        return back()->with('error', 'Something went wrong during the transaction. Please try again. Error: ' . $e->getMessage());
     }
 }
+
 
     private function generateUniqueVerificationToken()
     {

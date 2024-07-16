@@ -14,7 +14,7 @@ class ServiceProvider extends Model
         'service_type',
         'contact_number',
         'address',
-        'service_image',
+      
         'is_approved',
         'county_id',
         'latitude',
